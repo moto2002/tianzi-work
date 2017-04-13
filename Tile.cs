@@ -111,7 +111,9 @@ public class Tile
     /// 水体数据
     /// </summary>
 	private WaterData waterData;
-
+    /// <summary>
+    /// 分帧处理更新tile所属unit对象映射列表计数,场景两次update进行一次更新
+    /// </summary>
 	private int tick;
 
 	public bool preload;
@@ -159,7 +161,9 @@ public class Tile
     /// 网格材质
     /// </summary>
 	private Material gridDataMat;
-
+     /// <summary>
+     /// 获取tile的地形光照贴图原型数据对象
+     /// </summary>
 	public LightmapPrototype lightmapPrototype
 	{
 		get

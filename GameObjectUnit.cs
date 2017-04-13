@@ -36,107 +36,201 @@ public class GameObjectUnit
 	public GameObject ins;
 
 	public bool isStatic = true;
-
+    /// <summary>
+    /// 当前unit相关资源的路径
+    /// </summary>
 	public string prePath = string.Empty;
-
+    /// <summary>
+    /// 当前unit的位置坐标
+    /// </summary>
 	public Vector3 position;
-
+    /// <summary>
+    /// 当前unit的方向
+    /// </summary>
 	public Quaternion rotation;
-
+    /// <summary>
+    /// 当前unit的缩放率
+    /// </summary>
 	public Vector3 localScale;
-
+    /// <summary>
+    /// 当前unit的中心点坐标
+    /// </summary>
 	public Vector3 center;
 
 	public Vector3 size = Vector3.zero;
-
+    /// <summary>
+    /// 剔除因子，用来计算剔除距离
+    /// </summary>
 	public float cullingFactor;
-
+    /// <summary>
+    /// 依赖的资源数量
+    /// </summary>
 	private int dependResCount;
 
 	public bool visible;
-
+    /// <summary>
+    /// 近视距离，用来判断是否需要加入场景逻辑
+    /// </summary>
 	public float near;
-
+    /// <summary>
+    /// 剔除距离，当主角到它的视距超过时，需要从场景剔除
+    /// </summary>
 	public float far;
-
+    /// <summary>
+    /// 当前更新的视距
+    /// </summary>
 	public float viewDistance;
-
+    /// <summary>
+    /// 当前更新的视角
+    /// </summary>
 	public float viewAngle;
-
+    /// <summary>
+    /// 当前unit涉及的tile列表
+    /// </summary>
 	public List<Tile> tiles = new List<Tile>();
-
+    /// <summary>
+    /// 当前unit所在的tile
+    /// </summary>
 	public Tile mainTile;
-
+    /// <summary>
+    /// 是否启用碰撞
+    /// </summary>
 	public bool hasCollision;
-
+    /// <summary>
+    /// 预判时使用的步伐半径??????
+    /// </summary>
 	public float radius = 1f;
-
+    /// <summary>
+    /// 启用碰撞时的碰撞尺寸
+    /// </summary>
 	public int collisionSize = 1;
 
 	private int[,] _grids;
-
+    /// <summary>
+    /// 挂载的component组件列表
+    /// </summary>
 	public List<string> components = new List<string>();
-
+    /// <summary>
+    /// 光照贴图原型数据列表
+    /// </summary>
 	public List<LightmapPrototype> lightmapPrototypes = new List<LightmapPrototype>();
 
 	public bool needScreenPoint = true;
-
+    /// <summary>
+    /// 计算的当前unit的摄像机空间坐标
+    /// </summary>
 	public Vector3 screenPoint;
-
+    /// <summary>
+    /// 是否启用触摸功能
+    /// </summary>
 	public bool mouseEnable = true;
-
+    /// <summary>
+    /// unit类型
+    /// </summary>
 	public int type = UnitType.UnitType_General;
-
+    /// <summary>
+    /// unit数据解析器
+    /// </summary>
 	public UnitParser unitParser;
-
+    /// <summary>
+    /// 加载类型
+    /// </summary>
 	public LoadType loadtype = LoadType.Type_Resources;
-
+    /// <summary>
+    /// 是否生成水波纹效果
+    /// </summary>
 	public bool genRipple;
-
+    /// <summary>
+    /// 水波纹生成位置
+    /// </summary>
 	protected Vector3 ripplePos;
-
+    /// <summary>
+    /// 生成水波纹的延迟tick计数
+    /// </summary>
 	public int genRippleDelayTick = 50;
-
+    /// <summary>
+    /// unit当前所属场景引用
+    /// </summary>
 	public GameScene scene;
-
+    /// <summary>
+    /// 游戏对象是否激活
+    /// </summary>
 	public bool active;
-
+    /// <summary>
+    /// unit的世界位置坐标
+    /// </summary>
 	protected Vector3 scenePoint = Vector3.zero;
-
+    /// <summary>
+    /// 场景坐标点偏置量
+    /// </summary>
 	public float scenePointBias = 1f;
-
+    /// <summary>
+    /// tick计数   update调用次数?????
+    /// </summary>
 	private int tick;
-
+    /// <summary>
+    /// 是否需要采样计算高度
+    /// </summary>
 	public bool needSampleHeight = true;
-
+    /// <summary>
+    /// 材质列表
+    /// </summary>
 	public List<Material> materials = new List<Material>();
-
+    /// <summary>
+    /// 组合父unitID
+    /// </summary>
 	public int combineParentUnitID = -1;
-
+    /// <summary>
+    /// 组合子unitID列表
+    /// </summary>
 	public List<int> combinUnitIDs = new List<int>();
-
+    /// <summary>
+    /// 数据是否已读取
+    /// </summary>
 	private bool readed;
-
+    /// <summary>
+    /// unit需读取的数据长度
+    /// </summary>
 	private long dataLength;
-
+    /// <summary>
+    /// 是否已销毁
+    /// </summary>
 	public bool destroyed;
-
+    /// <summary>
+    /// 是否开启投影
+    /// </summary>
 	public bool castShadows;
-
+    /// <summary>
+    /// 之前是否开启投影
+    /// </summary>
 	protected bool oldCastShadows;
-
+    /// <summary>
+    /// unit阻塞的网格数
+    /// </summary>
 	private int gridCount;
-
+    /// <summary>
+    /// unit最大阻塞的网格数量
+    /// </summary>
 	private int maxGridCount = 200;
-
+    /// <summary>
+    /// 观察目标时计算的视线方向
+    /// </summary>
 	private Vector3 lookAtEuler = new Vector3(0f, 0f, 0f);
-
+    /// <summary>
+    /// 计算视线的高度值(观察的y坐标)
+    /// </summary>
 	public float euler;
-
+    /// <summary>
+    /// 标记是否需要更新旋转角度
+    /// </summary>
 	protected bool _rotationDirty;
-
+    /// <summary>
+    /// 缺失资源????????
+    /// </summary>
 	public bool lostAsset;
-
+    /// <summary>
+    /// 当前unit的shader名称
+    /// </summary>
 	private string shaderName = string.Empty;
 
 	protected static string diffuseShaderName = "Diffuse";
@@ -152,27 +246,45 @@ public class GameObjectUnit
 	protected static string snailDiffusePointShaderName = "Snail/Diffuse-PointLight";
 
 	protected static string snailDiffusePointCutoutShaderName = "Snail/Diffuse-PointLight-Cutout";
-
+    /// <summary>
+    /// 漫反射shader，官方版本
+    /// </summary>
 	protected static Shader diffuseShader = Shader.Find(GameObjectUnit.diffuseShaderName);
-
+    /// <summary>
+    /// cutout镂空shader
+    /// </summary>
 	protected static Shader diffuseCutoutShader = Shader.Find(GameObjectUnit.diffuseCutoutShaderName);
-
+    /// <summary>
+    /// 自定义漫反射shader
+    /// </summary>
 	protected static Shader snailDiffuseShader = Shader.Find(GameObjectUnit.snailDiffuseShaderName);
-
+    /// <summary>
+    /// 自定义镂空漫反射shader
+    /// </summary>
 	protected static Shader snailDiffuseCutoutShader = Shader.Find(GameObjectUnit.snailDiffuseCutoutShaderName);
-
+    /// <summary>
+    /// 自定义漫反射点光源shader
+    /// </summary>
 	protected static Shader snailDiffusePointShader = Shader.Find(GameObjectUnit.snailDiffusePointShaderName);
-
+    /// <summary>
+    /// 自定义漫反射点光源镂空shader
+    /// </summary>
 	protected static Shader snailDiffusePointCutoutShader = Shader.Find(GameObjectUnit.snailDiffusePointCutoutShaderName);
 
 	private UnityEngine.Object pre;
 
 	public static GameObjectUnit.ThridPardResourManager thridPardResourManager;
-
+    /// <summary>
+    /// 出生效果预加载路径
+    /// </summary>
 	private string _bornEffectPrePath = string.Empty;
-
+    /// <summary>
+    /// 出生效果
+    /// </summary>
 	protected GameObject bornEffect;
-
+    /// <summary>
+    /// unit相关网格坐标数组
+    /// </summary>
 	public int[,] grids
 	{
 		get
@@ -195,7 +307,9 @@ public class GameObjectUnit
 			}
 		}
 	}
-
+    /// <summary>
+    /// 获取或者设置出生效果路径，并播放
+    /// </summary>
 	public string bornEffectPrePath
 	{
 		get
@@ -208,12 +322,18 @@ public class GameObjectUnit
 			this.PlayBornEffect();
 		}
 	}
-
+    /// <summary>
+    /// 构造一个unit游戏对象
+    /// </summary>
+    /// <param name="createID"></param>
 	public GameObjectUnit(int createID)
 	{
 		this.createID = createID;
 	}
-
+    /// <summary>
+    /// 组合unit
+    /// </summary>
+    /// <param name="units"></param>
 	public void CombineUnits(List<GameObjectUnit> units)
 	{
 		this.combinUnitIDs.Clear();
@@ -225,7 +345,10 @@ public class GameObjectUnit
 			this.scene.RemoveUnit(units[i], false, false);
 		}
 	}
-
+    /// <summary>
+    /// 拆分组合的unit
+    /// </summary>
+    /// <returns></returns>
 	public bool DeCombineUnits()
 	{
 		if (this.combinUnitIDs.Count < 1)
@@ -244,7 +367,14 @@ public class GameObjectUnit
 		this.combinUnitIDs.Clear();
 		return true;
 	}
-
+    /// <summary>
+    /// 创建unit游戏对象
+    /// </summary>
+    /// <param name="scene"></param>
+    /// <param name="pos"></param>
+    /// <param name="createID"></param>
+    /// <param name="prePath"></param>
+    /// <returns></returns>
 	public static GameObjectUnit Create(GameScene scene, Vector3 pos, int createID, string prePath)
 	{
 		GameObjectUnit gameObjectUnit = new GameObjectUnit(createID);
@@ -255,7 +385,11 @@ public class GameObjectUnit
 		gameObjectUnit.UpdateViewRange();
 		return gameObjectUnit;
 	}
-
+    /// <summary>
+    /// 读取unit数据信息
+    /// </summary>
+    /// <param name="br"></param>
+    /// <param name="cID"></param>
 	public void Read(BinaryReader br, int cID)
 	{
 		if (this.readed && this.dataLength > 0L)
@@ -275,7 +409,7 @@ public class GameObjectUnit
 			if (!GameScene.isPlaying)
 			{
 			}
-			this.unitParser = UnitType.GenUnitParser(this.type);
+			this.unitParser = UnitType.GenUnitParser(this.type);  //根据不同unit类型，使用对应的解析器解析数据
 			this.unitParser.unit = this;
 			if (GameScene.isPlaying && this.type == UnitType.UnitType_Light && this.scene.lightDataLength > 0L)
 			{
@@ -365,7 +499,7 @@ public class GameObjectUnit
 		}
 		br.ReadSingle();
 		br.ReadSingle();
-		if (this.cullingFactor <= 0.01f)
+		if (this.cullingFactor <= 0.01f)   //太小，使用默认剔除因子
 		{
 			this.cullingFactor = this.scene.terrainConfig.defautCullingFactor;
 		}
@@ -379,7 +513,7 @@ public class GameObjectUnit
 		this.readed = true;
 	}
     /// <summary>
-    /// 将指定网格坐标加入unit网格列表中      [x0,y0,x1,y1......]
+    /// 将指定阻塞网格坐标加入unit网格列表中      [x0,y0,x1,y1......]
     /// </summary>
     /// <param name="gridX"></param>
     /// <param name="gridY"></param>
@@ -412,7 +546,10 @@ public class GameObjectUnit
 			this.grids[i, 1] = 0;
 		}
 	}
-
+    /// <summary>
+    /// 获取空的相关网格坐标数组
+    /// </summary>
+    /// <returns></returns>
 	public int[,] GetCleanGrids()
 	{
 		int[,] array = new int[this.gridCount, 2];
@@ -423,7 +560,11 @@ public class GameObjectUnit
 		}
 		return array;
 	}
-
+    /// <summary>
+    /// 朝向目标位置
+    /// </summary>
+    /// <param name="target"></param>
+    /// <returns></returns>
 	public float LookAt(Vector3 target)
 	{
 		if (Mathf.Abs(target.z - this.position.z) < 0.01f && Mathf.Abs(target.x - this.position.x) < 0.01f)
@@ -435,7 +576,11 @@ public class GameObjectUnit
 		this.rotation = Quaternion.Euler(this.lookAtEuler);
 		return this.euler;
 	}
-
+    /// <summary>
+    /// 沿着y轴旋转角度
+    /// </summary>
+    /// <param name="deg"></param>
+    /// <param name="immediately"></param>
 	public void RotaionY(float deg, bool immediately = false)
 	{
 		this.rotation = Quaternion.Euler(0f, deg * 57.29578f, 0f);
@@ -444,17 +589,23 @@ public class GameObjectUnit
 			this.ins.transform.rotation = this.rotation;
 		}
 	}
-
+    /// <summary>
+    /// 设置旋转角度
+    /// </summary>
+    /// <param name="rot"></param>
 	public void SetRotation(Quaternion rot)
 	{
 		this.rotation = rot;
 		this._rotationDirty = true;
 	}
-
+    /// <summary>
+    /// 状态更新
+    /// </summary>
 	public virtual void Update()
 	{
-		if (this.ins != null && !GameScene.isPlaying && this.isStatic)
+		if (this.ins != null && !GameScene.isPlaying && this.isStatic) //场景没有运行时，静态unit游戏对象已建立    --这里似乎不能保证只运行一次吧，多次运行不会浪费么？？？？
 		{
+            //游戏对象的位置偏移保存的位置大于阈值，计算更新影响的tile列表
 			if (Mathf.Abs(this.ins.transform.position.x - this.position.x) > 0.01f || Mathf.Abs(this.ins.transform.position.z - this.position.z) > 0.01f)
 			{
 				this.ComputeTiles();
@@ -641,15 +792,15 @@ public class GameObjectUnit
 				}
 			}
 			this.Renamme();
-			if (!GameScene.isPlaying)
+			if (!GameScene.isPlaying)   //场景没有开始运行
 			{
 				this.CollectMaterials();
 				this.AddMeshRenderColliders();
-				if (this.cullingFactor <= 0.01f)
+				if (this.cullingFactor <= 0.01f)    
 				{
 					this.cullingFactor = this.scene.terrainConfig.defautCullingFactor;
 				}
-				if (this.isStatic)
+				if (this.isStatic)     //如果是静态unit，计算更新影响的阻塞tile列表
 				{
 					this.ComputeTiles();
 				}
@@ -924,7 +1075,9 @@ public class GameObjectUnit
 			this.ins.name = "Unit_" + this.createID;
 		}
 	}
-
+    /// <summary>
+    /// 收集Unit使用了的材质列表,包括光照贴图相关材质
+    /// </summary>
 	public void CollectMaterials()
 	{
 		this.materials = new List<Material>();
@@ -950,7 +1103,9 @@ public class GameObjectUnit
 			}
 		}
 	}
-
+    /// <summary>
+    /// 设置不可视 ,开始隐藏
+    /// </summary>
 	public void Invisible()
 	{
 		if (this.visible)
@@ -977,7 +1132,9 @@ public class GameObjectUnit
 		}
 		this.visible = false;
 	}
-
+    /// <summary>
+    /// 销毁unit游戏对象
+    /// </summary>
 	public virtual void Destroy()
 	{
 		if (this.destroyInsListener != null)
@@ -1048,13 +1205,17 @@ public class GameObjectUnit
 		this.scene = null;
 		this.readed = false;
 	}
-
+    /// <summary>
+    /// 计算当前unit的剔除距离和进入距离
+    /// </summary>
 	public void UpdateViewRange()
 	{
 		this.near = this.scene.terrainConfig.unitCullingDistance * this.cullingFactor + this.scene.terrainConfig.cullingBaseDistance;
 		this.far = this.near + 2f;
 	}
-
+    /// <summary>
+    /// 更新计算阻塞tile列表
+    /// </summary>
 	public void ComputeTiles()
 	{
 		this.ClearTiles();
@@ -1067,22 +1228,22 @@ public class GameObjectUnit
 				BoxCollider boxCollider = this.ComputeBounds();
 				if (boxCollider != null)
 				{
-					this.cullingFactor = boxCollider.bounds.size.magnitude;
+					this.cullingFactor = boxCollider.bounds.size.magnitude;  //根据碰撞体的,包围盒对角线长度做剔除因子
 				}
 				if (this.cullingFactor <= 0.01f)
 				{
 					this.cullingFactor = this.scene.terrainConfig.defautCullingFactor;
 				}
 				this.UpdateViewRange();
-				for (int i = 0; i < this.scene.tiles.Count; i++)
+				for (int i = 0; i < this.scene.tiles.Count; i++)   //遍历当前场景的所有tile
 				{
 					Tile tile = this.scene.tiles[i];
-					if (boxCollider != null && boxCollider.bounds.Intersects(tile.bounds))
+					if (boxCollider != null && boxCollider.bounds.Intersects(tile.bounds))  //unit有碰撞，通过包围盒检测是否包含到该tile中去
 					{
 						this.AddTile(tile);
 					}
 				}
-				if (boxCollider != null)
+				if (boxCollider != null)     //使用完了就销毁，也就是说实际游戏运行中，不进行实际碰撞处理,依赖于服务器吧
 				{
 					DelegateProxy.DestroyObjectImmediate(boxCollider);
 				}
@@ -1093,7 +1254,9 @@ public class GameObjectUnit
 			Debug.Log("该单位没有所属切片, 无法进行存储! 单位编号[" + this.createID + "]");
 		}
 	}
-
+    /// <summary>
+    /// 清除相关tile列表，同时从这些tile移除当前unit的应用
+    /// </summary>
 	public void ClearTiles()
 	{
 		for (int i = 0; i < this.tiles.Count; i++)
@@ -1102,7 +1265,10 @@ public class GameObjectUnit
 		}
 		this.tiles.Clear();
 	}
-
+    /// <summary>
+    /// 添加tile到当前unit影响的tile列表
+    /// </summary>
+    /// <param name="tile"></param>
 	public void AddTile(Tile tile)
 	{
 		tile.AddUnit(this);
@@ -1111,7 +1277,9 @@ public class GameObjectUnit
 			this.tiles.Add(tile);
 		}
 	}
-
+    /// <summary>
+    /// 给unit下的所有网格组件添加MeshCollider碰撞组件
+    /// </summary>
 	private void AddMeshRenderColliders()
 	{
 		if (this.ins != null)
@@ -1131,7 +1299,10 @@ public class GameObjectUnit
 			}
 		}
 	}
-
+    /// <summary>
+    /// 根据网格渲染组件，计算unit的包围盒范围，并添加碰撞体
+    /// </summary>
+    /// <returns></returns>
 	public BoxCollider ComputeBounds()
 	{
 		if (this.ins == null)

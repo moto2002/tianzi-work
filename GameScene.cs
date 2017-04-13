@@ -805,7 +805,13 @@ public class GameScene
 			this.staticUnitcCache.Add(unit);
 		}
 	}
-
+    /// <summary>
+    /// 创建unit对象
+    /// </summary>
+    /// <param name="pos">位置</param>
+    /// <param name="prePath">资源路径</param>
+    /// <param name="isStatic">是否静态</param>
+    /// <returns></returns>
 	public GameObjectUnit CreateUnit(Vector3 pos, string prePath, bool isStatic = true)
 	{
 		this.unitIdCount++;
@@ -2316,7 +2322,7 @@ public class GameScene
 		for (int i = 0; i < num; i++)
 		{
 			GameObjectUnit gameObjectUnit3 = this.units[i];
-			if (!GameScene.isPlaying && gameObjectUnit3.isStatic)
+			if (!GameScene.isPlaying && gameObjectUnit3.isStatic)   //游戏未运行，准备阶段更新静态unit的影响tile列表，因为静态所以基本不变
 			{
 				gameObjectUnit3.Update();
 			}
@@ -2459,7 +2465,9 @@ public class GameScene
 			this.shadowUnits[i].castShadows = true;
 		}
 	}
-
+    /// <summary>
+    /// 移除待移除的动态unit
+    /// </summary>
 	public void RemvoeWillRemoveDynUnits()
 	{
 		for (int i = 0; i < this.units.Count; i++)
@@ -2473,7 +2481,11 @@ public class GameScene
 			}
 		}
 	}
-
+    /// <summary>
+    /// 获取触摸点一定范围内的一个可触摸动态unit
+    /// </summary>
+    /// <param name="touchRange"></param>
+    /// <returns></returns>
 	public GameObjectUnit GetTouchDynamicUnit(float touchRange = 700f)
 	{
 		int count = this.dynamicUnits.Count;
@@ -2494,7 +2506,11 @@ public class GameScene
 		}
 		return null;
 	}
-
+    /// <summary>
+    /// 获取指定位置所处的tile
+    /// </summary>
+    /// <param name="worldPosition"></param>
+    /// <returns></returns>
 	public Tile GetTileAt(Vector3 worldPosition)
 	{
 		int num = (int)Mathf.Floor((worldPosition.x + (float)this._terrainConfig.regionSize * 0.5f) / (float)this._terrainConfig.regionSize);
