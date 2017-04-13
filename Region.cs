@@ -294,7 +294,7 @@ public class Region
 				this.dx = eyePos.x - this.tiles[i].position.x;
 				this.dz = eyePos.z - this.tiles[i].position.z;
 				this.tiles[i].viewDistance = Mathf.Sqrt(this.dx * this.dx + this.dz * this.dz);
-				if (this.tiles[i].viewDistance < this.tiles[i].far) //在视线范围内，才加入场景tile列表
+				if (this.tiles[i].viewDistance < this.tiles[i].far) //在剔除范围内，才加入场景tile列表
 				{
 					this.scene.AddTile(this.tiles[i]);
 				}

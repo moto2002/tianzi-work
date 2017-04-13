@@ -5,38 +5,65 @@ using UnityEngine;
 
 public class Tile
 {
+    /// <summary>
+    /// 当前tile的引用键key
+    /// </summary>
 	public string key = string.Empty;
-
+    /// <summary>
+    /// tile在Region中的tile坐标x
+    /// </summary>
 	public int tileX;
-
+    /// <summary>
+    /// tile在Region中的tile坐标y
+    /// </summary>
 	public int tileY;
-
+    /// <summary>
+    /// 当前视点到tile的视距
+    /// </summary>
 	public float viewDistance;
-
+    /// <summary>
+    /// tile的世界位置坐标
+    /// </summary>
 	public Vector3 position = Vector3.zero;
     /// <summary>
     /// tile剔除距离
     /// </summary>
 	public float far;
-
+    /// <summary>
+    /// 当前tile的unit映射
+    /// </summary>
 	private Dictionary<int, GameObjectUnit> unitsMap = new Dictionary<int, GameObjectUnit>();
-
+    /// <summary>
+    /// 当前tile的unit游戏对象列表
+    /// </summary>
 	public List<GameObjectUnit> units = new List<GameObjectUnit>();
-
+    /// <summary>
+    /// 当前tile的unit数量
+    /// </summary>
 	public int unitCount;
-
+    /// <summary>
+    /// 当前tile所属的Region
+    /// </summary>
 	public Region region;
-
+    /// <summary>
+    /// 当前tile的数据加载路径
+    /// </summary>
 	public string path = string.Empty;
-
+    /// <summary>
+    /// 当前tile是否可视
+    /// </summary>
 	public bool visible;
     /// <summary>
     /// tile包围盒
     /// </summary>
 	public Bounds bounds;
-
+    /// <summary>
+    /// 当前tile的高度列表
+    /// </summary>
 	public float[,] heights;
-
+    /// <summary>
+    /// 当前tile的网格列表  ---编辑器辅助用的吧????????
+    /// </summary>
 	public int[,] grids;
     /// <summary>
     /// 左边的tile
@@ -88,13 +115,21 @@ public class Tile
 	private int tick;
 
 	public bool preload;
-
+    /// <summary>
+    /// 当前游戏场景对象引用
+    /// </summary>
 	public GameScene scene;
-
+    /// <summary>
+    /// 判断unit是否可视临时记录x坐标距离
+    /// </summary>
 	private float dx;
-
+    /// <summary>
+    /// 判断unit是否可视临时记录y坐标距离
+    /// </summary>
 	private float dz;
-
+    /// <summary>
+    /// 分批判断Unit是否可视，临时记录上一批判断处理的最后索引值
+    /// </summary>
 	private int unitInd;
     /// <summary>
     /// 检查运算的临时计数
@@ -108,13 +143,21 @@ public class Tile
     /// 上次检查运算的最后索引记录
     /// </summary>
 	private int lastInd;
-
+    /// <summary>
+    /// 网格游戏对象
+    /// </summary>
 	private GameObject gridDataGO;
-
+    /// <summary>
+    /// 网格mesh对象
+    /// </summary>
 	private Mesh gridDataMesh = new Mesh();
-
+    /// <summary>
+    /// 网格shader
+    /// </summary>
 	private Shader gridDataShader;
-
+    /// <summary>
+    /// 网格材质
+    /// </summary>
 	private Material gridDataMat;
 
 	public LightmapPrototype lightmapPrototype
@@ -134,13 +177,19 @@ public class Tile
 			return this._lightmapPrototype;
 		}
 	}
-
+    /// <summary>
+    /// 构造方法，传入当前tile所属Region和GameScen的引用
+    /// </summary>
+    /// <param name="region"></param>
 	public Tile(Region region)
 	{
 		this.region = region;
 		this.scene = region.scene;
 	}
-
+    /// <summary>
+    /// 添加指定的unit到tile的unit映射中
+    /// </summary>
+    /// <param name="unit"></param>
 	public void AddUnit(GameObjectUnit unit)
 	{
 		if (this.unitsMap.ContainsKey(unit.createID))
@@ -151,7 +200,10 @@ public class Tile
 		this.units.Add(unit);
 		this.unitCount++;
 	}
-
+    /// <summary>
+    /// 从unit映射中移除指定unit对象
+    /// </summary>
+    /// <param name="unit"></param>
 	public void RemoveUnit(GameObjectUnit unit)
 	{
 		if (this.unitsMap.ContainsKey(unit.createID))
@@ -161,7 +213,11 @@ public class Tile
 			this.unitCount--;
 		}
 	}
-
+    /// <summary>
+    /// 根据unitID获取指定的unit对象
+    /// </summary>
+    /// <param name="createID"></param>
+    /// <returns></returns>
 	public GameObjectUnit FindUnit(int createID)
 	{
 		if (this.unitsMap.ContainsKey(createID))
@@ -170,12 +226,22 @@ public class Tile
 		}
 		return null;
 	}
-
+    /// <summary>
+    /// tile是否包含指定unit映射
+    /// </summary>
+    /// <param name="unit"></param>
+    /// <returns></returns>
 	public bool ContainUnit(GameObjectUnit unit)
 	{
 		return this.unitsMap.ContainsKey(unit.createID);
 	}
-
+    /// <summary>
+    /// 根据Region信息创建指定的tile对象
+    /// </summary>
+    /// <param name="region"></param>
+    /// <param name="tileX"></param>
+    /// <param name="tileY"></param>
+    /// <returns></returns>
 	public static Tile Create(Region region, int tileX, int tileY)
 	{
 		TerrainConfig terrainConfig = region.scene.terrainConfig;
@@ -215,7 +281,9 @@ public class Tile
 		});
 		return tile;
 	}
-
+    /// <summary>
+    /// 更新视图已经unit的视图更新
+    /// </summary>
 	public void UpdateViewRange()
 	{
 		this.far = this.region.scene.terrainConfig.tileCullingDistance;
@@ -338,6 +406,7 @@ public class Tile
 					gameObjectUnit.Destroy();
 					this.scene.RemoveEmptyUnit(gameObjectUnit);
 				}
+                //将unit，tile,scene关联映射
 				num4++;
 				if (num4 >= num3)
 				{
@@ -514,7 +583,9 @@ public class Tile
 		}
 		this.tick++;
 	}
-
+    /// <summary>
+    /// 开启显示
+    /// </summary>
 	public void Visible()
 	{
 		if (LightmapSettings.lightmaps.Length > 0 && (this._lightmapPrototype.lightmapIndex == 255 || this._lightmapPrototype.lightmapIndex == -1))
@@ -524,6 +595,7 @@ public class Tile
 		}
 		if (!this.visible)
 		{
+            //创建显示水体
 			if (this.waterData != null && this.water == null)
 			{
 				this.water = Water.CreateWaterGameObject(this.waterData);
@@ -531,9 +603,10 @@ public class Tile
 				this.water.transform.position = new Vector3(this.position.x, this.water.waterData.height, this.position.z);
 			}
 			TerrainConfig terrainConfig = this.region.scene.terrainConfig;
+            //创建显示地形
 			if (terrainConfig.enableTerrain)
 			{
-				if (this.terrain == null)
+				if (this.terrain == null)    //没有先加载，完成加载进行显示
 				{
 					Asset asset;
 					if (this.region.scene.loadFromAssetBund)
@@ -560,7 +633,7 @@ public class Tile
 						}
 					}
 				}
-				else
+				else   //已有地形直接显示
 				{
 					this.terrain.gameObject.SetActive(true);
 				}
@@ -572,10 +645,13 @@ public class Tile
 		}
 		this.visible = true;
 	}
-
+    /// <summary>
+    /// 地形资源加载完成，开始显示地形
+    /// </summary>
+    /// <param name="asset"></param>
 	private void OnTerrainLoadCompate(Asset asset)
 	{
-		if (asset.loaded)
+		if (asset.loaded)   //资源加载的直接显示
 		{
 			this.terrain = asset.terrain;
 			this.terrain.name = this.key;
@@ -605,7 +681,7 @@ public class Tile
 				this.terrain.BuildMaterial(null);
 			}
 		}
-		else
+		else       //不是加载的，创建一个基础的地形
 		{
 			LODTerrainData terrainData = new LODTerrainData();
 			this.terrain = LODTerrain.CreateTerrainGameObject(terrainData, false);
@@ -614,16 +690,19 @@ public class Tile
 			this.terrain.gameObject.layer = GameLayer.Layer_Ground;
 			this.terrain.Init();
 		}
-		if (!GameScene.isPlaying && this.terrain != null)
+		if (!GameScene.isPlaying && this.terrain != null)//给地形添加网格碰撞器
 		{
 			this.terrain.gameObject.AddComponent<MeshCollider>();
 		}
 	}
-
+    /// <summary>
+    /// tile隐藏，不显示
+    /// </summary>
 	public void Invisible()
 	{
 		if (this.visible)
 		{
+            //隐藏水体和地形
 			if (this.terrain != null)
 			{
 				this.terrain.CancelBake();
@@ -636,7 +715,9 @@ public class Tile
 		}
 		this.visible = false;
 	}
-
+    /// <summary>
+    /// 销毁回收
+    /// </summary>
 	public void Destroy()
 	{
 		if (GameScene.isPlaying)
@@ -671,17 +752,20 @@ public class Tile
 				DelegateProxy.DestroyObjectImmediate(this.water.gameObject);
 			}
 		}
+        //同时销毁tile上的(静态)unit
 		if (this.units != null)
 		{
 			while (this.units.Count > 0)
 			{
 				GameObjectUnit gameObjectUnit = this.units[0];
+                //进行destory,放入cache待重用
 				if (this.scene.ContainUnit(gameObjectUnit))
 				{
 					this.scene.RemoveUnit(gameObjectUnit, true, true);
 				}
 				else
 				{
+                    //场景不包含的unit，销毁，并加入静态缓存待重用
 					gameObjectUnit.Destroy();
 					this.scene.RemoveEmptyUnit(gameObjectUnit);
 				}
@@ -708,7 +792,9 @@ public class Tile
 		this.heights = null;
 		this.grids = null;
 	}
-
+    /// <summary>
+    /// 移除水体
+    /// </summary>
 	public void RemoveWater()
 	{
 		if (this.water != null)
@@ -730,7 +816,13 @@ public class Tile
 			}
 		}
 	}
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="resolution">网格分辨率</param>
+    /// <param name="mask">射线检测layermask</param>
+    /// <param name="occlusionMask">计算检测剔除的层的layermask</param>
+    /// <param name="selectObject"></param>
 	public void ComputeHeights(int resolution, int mask, int occlusionMask, GameObjectUnit selectObject = null)
 	{
 		TerrainConfig terrainConfig = this.region.scene.terrainConfig;
@@ -765,6 +857,7 @@ public class Tile
 				bool flag = false;
 				for (int k = 0; k < array.Length; k++)
 				{
+                    //计算每个resolution block的坐标
 					origin.x = (float)i * num + this.position.x + array[k].x - (float)terrainConfig.tileSize * 0.5f;
 					origin.z = (float)j * num + this.position.z + array[k].z - (float)terrainConfig.tileSize * 0.5f;
 					ray.origin = origin;
@@ -772,7 +865,7 @@ public class Tile
 					Physics.Raycast(ray, out raycastHit, 2000f, mask);
 					if (raycastHit.transform != null)
 					{
-						if (num4 == 0 && (1 << raycastHit.transform.gameObject.layer & occlusionMask) >= 1)
+						if (num4 == 0 && (1 << raycastHit.transform.gameObject.layer & occlusionMask) >= 1) //如果射线检测的游戏对象和剔除层有交集，则该网格阻塞，不可通过
 						{
 							num4 = 1;
 						}
@@ -784,7 +877,7 @@ public class Tile
 						{
 							num3 = raycastHit.point.y;
 						}
-						if (selectObject != null && selectObject.ins != null && raycastHit.transform.gameObject.name == selectObject.ins.name)
+						if (selectObject != null && selectObject.ins != null && raycastHit.transform.gameObject.name == selectObject.ins.name)   //射线检测到的游戏对象为待测试游戏对象
 						{
 							flag = true;
 						}
@@ -793,7 +886,7 @@ public class Tile
 				this.grids[i, j] = num4;
 				if (num4 == 0)
 				{
-					if (num3 - num2 > terrainConfig.blockHeight)
+					if (num3 - num2 > terrainConfig.blockHeight)        //如果一个resolution block 五点检测的最大高度度和最小高度差值大于阻塞高度，则改网格为阻塞，不可通过,否则可以
 					{
 						this.grids[i, j] = 1;
 					}
@@ -824,12 +917,12 @@ public class Tile
 						}
 					}
 				}
-				if (num3 > terrainConfig.maxReachTerrainHeight)
+				if (num3 > terrainConfig.maxReachTerrainHeight)//如果网格点高度，大于最大高度，则该网格点不可通过
 				{
 					this.grids[i, j] = 1;
 				}
-				this.heights[i, j] = num3;
-				if (flag && this.grids[i, j] == 1)
+				this.heights[i, j] = num3;    //计算保存网格点的高度值
+				if (flag && this.grids[i, j] == 1) //拣选到待测试对象，并且该网格阻塞，则将该网格坐标加入待测试unit网格列表中
 				{
 					float num5 = (float)i * num + this.position.x + array[4].x - (float)terrainConfig.tileSize * 0.5f;
 					float num6 = (float)j * num + this.position.z + array[4].z - (float)terrainConfig.tileSize * 0.5f;
@@ -840,7 +933,11 @@ public class Tile
 			}
 		}
 	}
-
+    /// <summary>
+    /// 采样计算tile边界处的世界坐标点的高度值 采用了一个均值平衡的算法
+    /// </summary>
+    /// <param name="worldPosition"></param>
+    /// <returns></returns>
 	public float SampleHeightInterpolation(Vector3 worldPosition)
 	{
 		TerrainConfig terrainConfig = this.region.scene.terrainConfig;
@@ -871,7 +968,12 @@ public class Tile
 		float num11 = this.heights[num6, num9] * (1f - num4) + this.heights[num8, num9] * num4;
 		return num11 * num5 + num10 * (1f - num5);
 	}
-
+    /// <summary>
+    /// 直接取近似高度值
+    /// </summary>
+    /// <param name="worldPosition"></param>
+    /// <param name="curHeight"></param>
+    /// <returns></returns>
 	public float SampleHeight(Vector3 worldPosition, float curHeight = 0f)
 	{
 		TerrainConfig terrainConfig = this.region.scene.terrainConfig;
@@ -886,7 +988,9 @@ public class Tile
 		int num5 = (int)Mathf.Floor(num2 / num3);
 		return this.heights[num4, num5];
 	}
-
+    /// <summary>
+    /// 根据网格数据绘制网格
+    /// </summary>
 	public void DrawGridData()
 	{
 		TerrainConfig terrainConfig = this.region.scene.terrainConfig;

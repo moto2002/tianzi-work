@@ -378,7 +378,11 @@ public class GameObjectUnit
 		}
 		this.readed = true;
 	}
-
+    /// <summary>
+    /// 将指定网格坐标加入unit网格列表中      [x0,y0,x1,y1......]
+    /// </summary>
+    /// <param name="gridX"></param>
+    /// <param name="gridY"></param>
 	public void AppendGrid(int gridX, int gridY)
 	{
 		if (this.grids == null)
@@ -396,7 +400,9 @@ public class GameObjectUnit
 		this.grids[this.gridCount, 1] = gridY;
 		this.gridCount++;
 	}
-
+    /// <summary>
+    /// 重置生成初始网格
+    /// </summary>
 	public void ResetGrids()
 	{
 		this.grids = new int[this.maxGridCount, 2];

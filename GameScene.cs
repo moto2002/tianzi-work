@@ -2557,7 +2557,12 @@ public class GameScene
 		}
 		return null;
 	}
-
+    /// <summary>
+    /// 采样获取指定点的高度
+    /// </summary>
+    /// <param name="worldPosition"></param>
+    /// <param name="interpolation">是否是交界处</param>
+    /// <returns></returns>
 	public float SampleHeight(Vector3 worldPosition, bool interpolation = true)
 	{
 		if (this.terrainConfig == null) //读不到配置，默认值
