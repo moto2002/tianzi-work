@@ -102,29 +102,45 @@ public class GameScene
 	private static float[,] _heights;
 
 	public static GameScene mainScene = null;
-
+    /// <summary>
+    /// GameScene栈列表
+    /// </summary>
 	public static List<GameScene> sceneStack = new List<GameScene>();
     /// <summary>
     /// 场景静态物体根游戏对象
     /// </summary>
 	public static GameObject staticInsRoot;
-
+    /// <summary>
+    /// 场景主摄像机的RenderTexture
+    /// </summary>
 	public RenderTexture mainRTT;
 
 	public static bool SampleMode = false;
-
+    /// <summary>
+    /// 是否从assetbundle加载资源
+    /// </summary>
 	public bool loadFromAssetBund;
-
+    /// <summary>
+    /// 场景地形数据
+    /// </summary>
 	public global::TerrainData terrainData;
 
 	public bool statisticMode = true;
-
+    /// <summary>
+    /// 是否缓存模式
+    /// </summary>
 	public bool cacheMode;
-
+    /// <summary>
+    /// 需要预加载的资源路径列表 ---跟preloadUnitAssetTypeList中一一索引对应
+    /// </summary>
 	public List<string> preloadUnitAssetPathList = new List<string>();
-
+    /// <summary>
+    /// 需要预加载的资源类型列表
+    /// </summary>
 	public List<int> preloadUnitAssetTypeList = new List<int>();
-
+    /// <summary>
+    /// 进行预加载中的资源列表
+    /// </summary>
 	public List<Asset> preloadUnitAssetList = new List<Asset>();
     /// <summary>
     /// 场景静态unit单位列表
@@ -368,7 +384,10 @@ public class GameScene
 			GameScene._heights = value;
 		}
 	}
-
+    /// <summary>
+    /// 创建GameScene，新建？？？？
+    /// </summary>
+    /// <param name="createNew"></param>
 	public GameScene(bool createNew = false)
 	{
 		this.randomCode = UnityEngine.Random.value;
@@ -396,7 +415,9 @@ public class GameScene
 		this.postEffectsList.Add("Vignetting");
 		this.postEffectsList.Add("WaterDistortion");
 	}
-
+    /// <summary>
+    /// 销毁场景（主要是相关数据内存和引用等)
+    /// </summary>
 	public void Destroy()
 	{
 		if (this.mainCamera != null)
@@ -496,7 +517,7 @@ public class GameScene
 		{
 			GameScene.mainScene = null;
 		}
-		GameScene.sceneStack.Remove(this);
+		GameScene.sceneStack.Remove(this);  //作为当前的GameScene销毁时，需要从场景列表中移除
 		this.postEffectsList.Clear();
 		this.postEffectsList = null;
 		this.parsers.Clear();
@@ -511,7 +532,11 @@ public class GameScene
 		Resources.UnloadUnusedAssets();
 		GC.Collect();
 	}
-
+    /// <summary>
+    /// 根据场景id获取场景对象
+    /// </summary>
+    /// <param name="sceneID"></param>
+    /// <returns></returns>
 	public static GameScene FindScene(int sceneID)
 	{
 		int count = GameScene.sceneStack.Count;
@@ -1707,7 +1732,9 @@ public class GameScene
 		Shader.SetGlobalFloat("_lightRange", this._terrainConfig.rolePointLightRange);
 		Shader.SetGlobalFloat("_lightIntensity", this._terrainConfig.rolePointLightIntensity * 100f);
 	}
-
+    /// <summary>
+    /// 开始预加载需要加载的资源
+    /// </summary>
 	private void Preoad()
 	{
 		int num = 0;
@@ -1718,7 +1745,7 @@ public class GameScene
 			Asset item = AssetLibrary.Load(this.preloadUnitAssetPathList[i], type, LoadType.Type_Resources);
 			this.preloadUnitAssetList.Add(item);
 			num++;
-			if (num >= this.preloadMaxCountPer)
+			if (num >= this.preloadMaxCountPer) //一次预加载有最多数量限制
 			{
 				this.loadIndex = i + 1;
 				return;
@@ -2044,7 +2071,7 @@ public class GameScene
 			return;
 		}
 		this.progressInc = 0.01f;
-		if (this.preloadTick % this.preloadInterval == 0)
+		if (this.preloadTick % this.preloadInterval == 0) //一定间隔进行一次预加载
 		{
 			this.Preoad();
 		}

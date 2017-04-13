@@ -270,7 +270,9 @@ public class GameObjectUnit
     /// 自定义漫反射点光源镂空shader
     /// </summary>
 	protected static Shader snailDiffusePointCutoutShader = Shader.Find(GameObjectUnit.snailDiffusePointCutoutShaderName);
-
+    /// <summary>
+    /// 预加载的资源游戏对象
+    /// </summary>
 	private UnityEngine.Object pre;
 
 	public static GameObjectUnit.ThridPardResourManager thridPardResourManager;
@@ -617,7 +619,10 @@ public class GameObjectUnit
 		}
 		this.tick++;
 	}
-
+    /// <summary>
+    /// 加载完成，进行初始化
+    /// </summary>
+    /// <param name="args"></param>
 	private void OnThridPartAssetLoaded(params object[] args)
 	{
 		if (this.destroyed || this.willRemoved)
@@ -631,33 +636,36 @@ public class GameObjectUnit
 			this.ActiveDynaUnit();
 		}
 	}
-
+    /// <summary>
+    /// 初始化unit场景显示游戏对象
+    /// </summary>
 	private void Initialize()
 	{
-		if (this.destroyed || this.willRemoved)
+		if (this.destroyed || this.willRemoved)    //待销毁或移除，无法初始化
 		{
 			return;
 		}
 		if (this.ins == null && this.pre != null)
 		{
-			if (!this.isStatic)
+            //实例化gameObject
+			if (!this.isStatic)     //动态unit直接instantiate
 			{
 				this.ins = (DelegateProxy.Instantiate(this.pre) as GameObject);
 			}
-			else
+			else                    //静态unit，根据数据信息解析相关属性来构建
 			{
 				this.ins = (this.unitParser.Instantiate(this.pre) as GameObject);
 			}
 			if (!GameScene.isPlaying)
 			{
-				this.type = UnitType.GetType(this.ins.layer);
+				this.type = UnitType.GetType(this.ins.layer); //根据layer获取unit的类型
 			}
-			if (!this.isStatic && this.needSampleHeight)
+			if (!this.isStatic && this.needSampleHeight)    //非静态物体，计算unit位置点的地面高度给位置坐标y值，保证站立在地面上
 			{
 				this.position.y = this.scene.SampleHeight(this.position, true);
 			}
-			this.ins.transform.position = this.position;
-			if (this.components != null)
+			this.ins.transform.position = this.position; //设定位置
+			if (this.components != null)   //挂载component，问题components从哪儿获取?????//
 			{
 				int count = this.components.Count;
 				for (int i = 0; i < count; i++)
@@ -669,7 +677,7 @@ public class GameObjectUnit
 			{
 				this.ins.transform.rotation = this.rotation;
 				this.ins.transform.localScale = this.localScale;
-				if (LightmapSettings.lightmaps.Length > 0)
+				if (LightmapSettings.lightmaps.Length > 0) //光照贴图属性赋值
 				{
 					int count = this.lightmapPrototypes.Count;
 					for (int j = 0; j < count; j++)
@@ -691,6 +699,7 @@ public class GameObjectUnit
 						}
 					}
 				}
+                //收集所有Render列表
 				List<Renderer> list = new List<Renderer>();
 				if (this.ins.renderer != null)
 				{
@@ -704,7 +713,7 @@ public class GameObjectUnit
 						list.Add(renderer2);
 					}
 				}
-				if (GameScene.isPlaying)
+				if (GameScene.isPlaying)  //场景开始运行
 				{
 					for (int l = 0; l < list.Count; l++)
 					{
@@ -713,7 +722,7 @@ public class GameObjectUnit
 							Material material = list[l].materials[m];
 							if (material != null)
 							{
-								if (list[l].gameObject.layer == GameLayer.Layer_Ground)
+								if (list[l].gameObject.layer == GameLayer.Layer_Ground)  //实时场景运行时，只有地面接受阴影
 								{
 									list[l].receiveShadows = true;
 								}
@@ -722,7 +731,7 @@ public class GameObjectUnit
 									list[l].receiveShadows = false;
 								}
 								this.shaderName = material.shader.name;
-								if (!this.scene.terrainConfig.enablePointLight)
+								if (!this.scene.terrainConfig.enablePointLight)    //根据是否启用点光源，使用不同的材质shader
 								{
 									if (this.shaderName == GameObjectUnit.diffuseShaderName || this.shaderName == GameObjectUnit.snailDiffusePointShaderName)
 									{
@@ -750,6 +759,7 @@ public class GameObjectUnit
 				}
 				else
 				{
+                    //场景没有运行时，需要开启接受阴影和产生阴影，便于bake光照贴图
 					for (int n = 0; n < list.Count; n++)
 					{
 						list[n].receiveShadows = true;
@@ -781,7 +791,7 @@ public class GameObjectUnit
 			{
 				try
 				{
-					this.createInsListener();
+					this.createInsListener();  //动态unit调用创建对象回调
 				}
 				catch (Exception ex)
 				{
@@ -836,9 +846,12 @@ public class GameObjectUnit
 				}
 			}
 		}
-		this.PlayBornEffect();
+		this.PlayBornEffect();  //初始化完成，开始播放出生效果
 	}
-
+    /// <summary>
+    /// 根据设置更换合适的shader 和设置响应的阴影设置
+    /// </summary>
+    /// <param name="sRender"></param>
 	public static void ChangeShader(Renderer sRender)
 	{
 		if (sRender == null || GameScene.mainScene == null)
@@ -846,7 +859,7 @@ public class GameObjectUnit
 			return;
 		}
 		bool flag = false;
-		if (sRender.gameObject.layer == GameLayer.Layer_Ground)
+		if (sRender.gameObject.layer == GameLayer.Layer_Ground)    //只有地面接受阴影哦
 		{
 			sRender.receiveShadows = true;
 		}
@@ -898,7 +911,11 @@ public class GameObjectUnit
 			}
 		}
 	}
-
+    /// <summary>
+    /// 更新指定材质的shader，
+    /// </summary>
+    /// <param name="mt"></param>
+    /// <param name="args">待适配的shader列表</param>
 	public static void ChangeShader(Material mt, params string[] args)
 	{
 		Shader[] array = new Shader[args.Length];
@@ -926,7 +943,9 @@ public class GameObjectUnit
 			}
 		}
 	}
-
+    /// <summary>
+    /// 播放出生效果
+    /// </summary>
 	private void PlayBornEffect()
 	{
 		if (this.bornEffect == null && this._bornEffectPrePath != string.Empty && this.ins != null)
@@ -946,7 +965,9 @@ public class GameObjectUnit
 			}
 		}
 	}
-
+    /// <summary>
+    /// 激活动态unit
+    /// </summary>
 	private void ActiveDynaUnit()
 	{
 		this.ins.SetActive(true);
@@ -954,7 +975,7 @@ public class GameObjectUnit
 		{
 			try
 			{
-				this.activeListener(true);
+				this.activeListener(true);   //触发激活回调
 			}
 			catch (Exception ex)
 			{
@@ -965,10 +986,12 @@ public class GameObjectUnit
 			}
 		}
 	}
-
+    /// <summary>
+    /// 开始显示gameobject对象
+    /// </summary>
 	public void Visible()
 	{
-		if (this.destroyed || this.willRemoved)
+		if (this.destroyed || this.willRemoved)  //销毁或待移除，没法可视
 		{
 			return;
 		}
@@ -976,7 +999,7 @@ public class GameObjectUnit
 		{
 			if (this.ins == null)
 			{
-				if (this.prePath != string.Empty)
+				if (this.prePath != string.Empty)  //需要预先加载
 				{
 					if (GameObjectUnit.thridPardResourManager != null && this.scene.loadFromAssetBund)
 					{
@@ -1011,14 +1034,16 @@ public class GameObjectUnit
 			{
 				this.ins.SetActive(true);
 			}
-			if (!this.isStatic && this.ins != null)
+			if (!this.isStatic && this.ins != null) //如果不是静态，激活动态unit
 			{
 				this.ActiveDynaUnit();
 			}
 		}
 		this.visible = true;
 	}
-
+    /// <summary>
+    /// 重命名unit游戏对象
+    /// </summary>
 	public void Renamme()
 	{
 		if (!GameScene.isPlaying)
