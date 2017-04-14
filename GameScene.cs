@@ -58,9 +58,13 @@ public class GameScene
 	public List<Region> regions;
 
 	public Vector3 eyePos = Vector3.zero;
-
+    /// <summary>
+    /// 视点所在Region的X坐标
+    /// </summary>
 	public int curRegionX;
-
+    /// <summary>
+    ///  视点所在Region的Y坐标
+    /// </summary>
 	public int curRegionY;
 
 	public Dictionary<int, GameObjectUnit> unitsMap;
@@ -80,7 +84,9 @@ public class GameScene
 	public List<Tile> tiles;
 
 	public Tile curTile;
-
+    /// <summary>
+    /// 不剔除unit
+    /// </summary>
 	public static bool dontCullUnit = true;
 
 	public static bool isEditor = false;
@@ -1568,7 +1574,7 @@ public class GameScene
 				binaryReader.BaseStream.Position = position;
 			}
 		}
-        //读取地形高度信心数据
+        //读取地形高度信息数据
 		this.terrainData = new global::TerrainData(this._terrainConfig.sceneWidth, this._terrainConfig.sceneHeight, 4, this._terrainConfig.maxTerrainHeight, this._terrainConfig.defaultTerrainHeight);
 		if (binaryReader.BaseStream.Position < binaryReader.BaseStream.Length)
 		{
@@ -1685,7 +1691,10 @@ public class GameScene
 		this.readCompalte = true;
 		return this;
 	}
-
+    /// <summary>
+    /// 地形贴图资源加载完成回调
+    /// </summary>
+    /// <param name="asset"></param>
 	public void LoadedTerTex(Asset asset)
 	{
 		this.loadTerrainTextureComplate = true;
@@ -1752,7 +1761,10 @@ public class GameScene
 			}
 		}
 	}
-
+    /// <summary>
+    /// 检测是否所有待预加载的资源都加载完成
+    /// </summary>
+    /// <returns></returns>
 	private bool CheckPreLoadComplate()
 	{
 		if (this.preloadUnitAssetList.Count < this.preloadUnitAssetPathList.Count)
@@ -1770,7 +1782,9 @@ public class GameScene
 		this.preloadComplate = true;
 		return true;
 	}
-
+    /// <summary>
+    /// 加载设置光照贴图
+    /// </summary>
 	public void LoadLightmap()
 	{
 		List<LightmapData> list = new List<LightmapData>();
@@ -1816,7 +1830,10 @@ public class GameScene
 		LightmapData[] lightmaps = list.ToArray();
 		LightmapSettings.lightmaps = lightmaps;
 	}
-
+    /// <summary>
+    /// 预加载进度获取
+    /// </summary>
+    /// <returns></returns>
 	private float PreLoadProgress()
 	{
 		int count = this.preloadUnitAssetList.Count;
