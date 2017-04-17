@@ -286,7 +286,7 @@ public class Tile
 		return tile;
 	}
     /// <summary>
-    /// 更新视图已经unit的视图更新
+    /// 更新当前tile的剔除距离，并更新当前tile下的所有unit的激活距离和剔除距离
     /// </summary>
 	public void UpdateViewRange()
 	{

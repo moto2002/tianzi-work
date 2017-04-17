@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 后期处理效果基类，其他效果皆实现基于此
+/// </summary>
 [ExecuteInEditMode]
 public class PEBase : MonoBehaviour
 {
@@ -14,7 +17,9 @@ public class PEBase : MonoBehaviour
 	protected Material m_Material;
 
 	protected Dictionary<string, int> _matParams;
-
+    /// <summary>
+    /// 效果相关的材质
+    /// </summary>
 	public virtual Material material
 	{
 		get
@@ -22,7 +27,9 @@ public class PEBase : MonoBehaviour
 			return null;
 		}
 	}
-
+    /// <summary>
+    /// 材质相关的属相列表
+    /// </summary>
 	public virtual Dictionary<string, int> matParams
 	{
 		get
@@ -30,11 +37,18 @@ public class PEBase : MonoBehaviour
 			return null;
 		}
 	}
-
+    /// <summary>
+    /// 加载参数属性
+    /// </summary>
 	public virtual void LoadParams()
 	{
 	}
-
+    /// <summary>
+    /// 检查shader,并创建效果相关的材质
+    /// </summary>
+    /// <param name="s"></param>
+    /// <param name="m2Create"></param>
+    /// <returns></returns>
 	public Material CheckShaderAndCreateMaterial(Shader s, Material m2Create)
 	{
 		if (s == null)
@@ -47,7 +61,7 @@ public class PEBase : MonoBehaviour
 		{
 			return m2Create;
 		}
-		if (!s.isSupported)
+		if (!s.isSupported)    //不支持，材质为空
 		{
 			this.NotSupported();
 			Debug.Log(string.Concat(new string[]
@@ -68,7 +82,12 @@ public class PEBase : MonoBehaviour
 		}
 		return null;
 	}
-
+    /// <summary>
+    /// 同上，创建后期处理相关的材质
+    /// </summary>
+    /// <param name="s"></param>
+    /// <param name="m2Create"></param>
+    /// <returns></returns>
 	public Material CreateMaterial(Shader s, Material m2Create)
 	{
 		if (s == null)
@@ -92,58 +111,79 @@ public class PEBase : MonoBehaviour
 		}
 		return null;
 	}
-
+    /// <summary>
+    /// 检查是否支持
+    /// </summary>
+    /// <returns></returns>
 	public bool CheckSupport()
 	{
 		return this.CheckSupport(false);
 	}
-
+    /// <summary>
+    /// 检查是否支持深度支持
+    /// </summary>
+    /// <param name="needDepth"></param>
+    /// <returns></returns>
 	public bool CheckSupport(bool needDepth)
 	{
 		this.isSupported = true;
 		this.supportHDRTextures = SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf);
 		this.supportDX11 = (SystemInfo.graphicsShaderLevel >= 50 && SystemInfo.supportsComputeShaders);
-		if (!SystemInfo.supportsImageEffects || !SystemInfo.supportsRenderTextures)
+		if (!SystemInfo.supportsImageEffects || !SystemInfo.supportsRenderTextures)   //判断是否支持后期处理效果
 		{
 			this.NotSupported();
 			return false;
 		}
-		if (needDepth && !SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth))
+		if (needDepth && !SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth)) //是否支持深度检测
 		{
 			this.NotSupported();
 			return false;
 		}
 		if (needDepth)
 		{
-			base.camera.depthTextureMode |= DepthTextureMode.Depth;
+			base.camera.depthTextureMode |= DepthTextureMode.Depth;   //开始摄像机深度贴图模式
 		}
 		return true;
 	}
-
+    /// <summary>
+    /// 检测深度和hdr支持
+    /// </summary>
+    /// <param name="needDepth"></param>
+    /// <param name="needHdr"></param>
+    /// <returns></returns>
 	public bool CheckSupport(bool needDepth, bool needHdr)
 	{
-		if (!this.CheckSupport(needDepth))
+		if (!this.CheckSupport(needDepth))           //深度支持检测
 		{
 			return false;
 		}
-		if (needHdr && !this.supportHDRTextures)
+		if (needHdr && !this.supportHDRTextures)     //hdr支持检测
 		{
 			this.NotSupported();
 			return false;
 		}
 		return true;
 	}
-
+    /// <summary>
+    /// dx11支持检测
+    /// </summary>
+    /// <returns></returns>
 	public bool Dx11Support()
 	{
 		return this.supportDX11;
 	}
-
+    /// <summary>
+    /// 自动禁用报告
+    /// </summary>
 	public void ReportAutoDisable()
 	{
 		Debug.LogWarning("The image effect " + this.ToString() + " has been disabled as it's not supported on the current platform.");
 	}
-
+    /// <summary>
+    /// 检测shader支持
+    /// </summary>
+    /// <param name="s"></param>
+    /// <returns></returns>
 	public bool CheckShader(Shader s)
 	{
 		Debug.Log(string.Concat(new string[]
@@ -161,13 +201,19 @@ public class PEBase : MonoBehaviour
 		}
 		return false;
 	}
-
+    /// <summary>
+    /// 不支持，禁用效果
+    /// </summary>
 	public void NotSupported()
 	{
 		base.enabled = false;
 		this.isSupported = false;
 	}
-
+    /// <summary>
+    /// 绘制边框
+    /// </summary>
+    /// <param name="dest"></param>
+    /// <param name="material"></param>
 	public void DrawBorder(RenderTexture dest, Material material)
 	{
 		RenderTexture.active = dest;

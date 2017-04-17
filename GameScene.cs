@@ -80,7 +80,9 @@ public class GameScene
 	public int curRegionY;
 
 	public Dictionary<int, GameObjectUnit> unitsMap;
-
+    /// <summary>
+    /// 当前的静态unit列表
+    /// </summary>
 	public List<GameObjectUnit> units;
 
 	public int unitCount;
@@ -203,7 +205,9 @@ public class GameScene
 	public static bool postEffectEnable = true;
 
 	private bool breset;
-
+    /// <summary>
+    /// 后期处理效果配置是否已经加载完成
+    /// </summary>
 	private bool peConfigLoaded;
     /// <summary>
     /// 动态unit单位id开始计数
@@ -303,27 +307,47 @@ public class GameScene
     /// 旧的场景加载unit技术tick,也就是已经加载了的unit计数tick
     /// </summary>
 	private int oldSceneLoadUnitTick;
-
+    /// <summary>
+    /// 视点的上次刷新位置
+    /// </summary>
 	private Vector3 lastPos;
-
+    /// <summary>
+    /// 每帧更新的tile数量
+    /// </summary>
 	private int visibleTilePerFrame = 1;
-
+    /// <summary>
+    /// 当前开启显示的tile计数
+    /// </summary>
 	private int visTileCount;
-
+    /// <summary>
+    /// 可视的动态unit计数
+    /// </summary>
 	public int visibleDynamicUnitCount;
-
+    /// <summary>
+    /// 可视的静态unit计数
+    /// </summary>
 	public int visibleStaticUnitCount;
-
+    /// <summary>
+    /// 每帧更新的可视动态unit数量限制
+    /// </summary>
 	private int visibleDynaUnitPerFrame;
-
+    /// <summary>
+    /// 每帧更新的可视静态unit数量限制
+    /// </summary>
 	private int visibleStaticUnitPerFrame;
-
+    /// <summary>
+    /// 每帧隐藏的静态unit数量限制
+    /// </summary>
 	private int hideStaticUnitPerFrame;
-
+    /// <summary>
+    /// 动态单位的数量上限
+    /// </summary>
 	public static int maxDynaUnit = 50;
 
 	public int visibleStaticTypeCount;
-
+    /// <summary>
+    /// 当前的动态unit列表
+    /// </summary>
 	public List<GameObjectUnit> dynamicUnits = new List<GameObjectUnit>();
 
 	public Dictionary<string, int> staticTypeMap = new Dictionary<string, int>();
@@ -612,7 +636,9 @@ public class GameScene
 			}
 		}
 	}
-
+    /// <summary>
+    /// 加载后期处理效果配置信息
+    /// </summary>
 	public void LoadPostEffectConfig()
 	{
 		if (this.peConfigLoaded)
@@ -626,7 +652,7 @@ public class GameScene
 			if (pEBase == null)
 			{
 				Type type = Type.GetType(text);
-				pEBase = (this.mainCamera.gameObject.AddComponent(type) as PEBase);
+				pEBase = (this.mainCamera.gameObject.AddComponent(type) as PEBase);    //效果组件加入主摄像机游戏对象
 			}
 			if (pEBase != null)
 			{
@@ -690,7 +716,9 @@ public class GameScene
 	{
 		StaticBatchingUtility.Combine(GameScene.staticInsRoot);
 	}
-
+    /// <summary>
+    /// 首次运行 ,创建根游戏对象
+    /// </summary>
 	public void FirstRun()
 	{
         //创建场景静态物体根对象
@@ -849,7 +877,7 @@ public class GameScene
 		}
 	}
     /// <summary>
-    /// 创建unit对象
+    /// 创建静态unit对象,指定对象的位置
     /// </summary>
     /// <param name="pos">位置</param>
     /// <param name="prePath">资源路径</param>
@@ -876,7 +904,15 @@ public class GameScene
 		this.AddUnit(gameObjectUnit);
 		return gameObjectUnit;
 	}
-
+    /// <summary>
+    /// 创建静态unit对象，并指定对象的自定义朝向和位置，对象属相来自配置
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="prePath"></param>
+    /// <param name="rotation"></param>
+    /// <param name="isStatic"></param>
+    /// <param name="parser">数据解析器</param>
+    /// <returns></returns>
 	public GameObjectUnit CreateUnit(Vector3 pos, string prePath, Quaternion rotation, bool isStatic = true, UnitParser parser = null)
 	{
 		this.unitIdCount++;
@@ -905,7 +941,15 @@ public class GameScene
 		this.AddUnit(gameObjectUnit);
 		return gameObjectUnit;
 	}
-
+    /// <summary>
+    /// 创建动态unit,并指定类型，剔除距离等，如果动态Unit列表中有，取出重用，否则新建
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="prePath"></param>
+    /// <param name="radius">碰撞计算半径？？？</param>
+    /// <param name="uType"></param>
+    /// <param name="dynamiCullingDistance"></param>
+    /// <returns></returns>
 	public DynamicUnit CreateDynamicUnit(Vector3 pos, string prePath, float radius, int uType = 0, float dynamiCullingDistance = -1f)
 	{
 		if (radius == 0f)
@@ -914,7 +958,7 @@ public class GameScene
 		}
 		this.unitIdCount++;
 		DynamicUnit dynamicUnit;
-		if (this.dynamicUnitsCache.Count > 0)
+		if (this.dynamicUnitsCache.Count > 0)          //如果有缓存，重用缓存
 		{
 			dynamicUnit = this.dynamicUnitsCache[0];
 			dynamicUnit.createID = this.unitIdCount + this.dynamicUnitStartCount;
@@ -926,7 +970,7 @@ public class GameScene
 			dynamicUnit.type = uType;
 			dynamicUnit.isStatic = false;
 			this.AddUnit(dynamicUnit);
-			if (dynamiCullingDistance > 0f)
+			if (dynamiCullingDistance > 0f)             //有指定剔除距离，使用，否则使用配置默认的剔除距离
 			{
 				dynamicUnit.near = dynamiCullingDistance;
 			}
@@ -945,10 +989,18 @@ public class GameScene
 			dynamicUnit.type = uType;
 		}
 		dynamicUnit.position = pos;
-		dynamicUnit.position.y = this.SampleHeight(pos, true);
+		dynamicUnit.position.y = this.SampleHeight(pos, true); //放到地面上
 		return dynamicUnit;
 	}
-
+    /// <summary>
+    /// 直接新建动态unit，指定剔除距离，类型等
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="prePath"></param>
+    /// <param name="radius"></param>
+    /// <param name="uType"></param>
+    /// <param name="dynamiCullingDistance"></param>
+    /// <returns></returns>
 	public DynamicUnit CreateDynamicUnitImmediately(Vector3 pos, string prePath, float radius, int uType = 0, float dynamiCullingDistance = -1f)
 	{
 		DynamicUnit dynamicUnit = this.CreateDynamicUnit(pos, prePath, radius, uType, dynamiCullingDistance);
@@ -959,13 +1011,17 @@ public class GameScene
 		{
 			dynamicUnit.position.y = this.SampleHeight(dynamicUnit.position, true);
 		}
-		if (dynamicUnit.viewDistance < dynamicUnit.far)
+		if (dynamicUnit.viewDistance < dynamicUnit.far)   //如果在剔除距离内，激活显示
 		{
 			dynamicUnit.Visible();
 		}
 		return dynamicUnit;
 	}
-
+    /// <summary>
+    /// 根据unitID在当前X宫格的所有region中查找unit对象
+    /// </summary>
+    /// <param name="createID"></param>
+    /// <returns></returns>
 	public GameObjectUnit FindUnitInRegions(int createID)
 	{
 		int count = this.regions.Count;
@@ -979,7 +1035,11 @@ public class GameScene
 		}
 		return null;
 	}
-
+    /// <summary>
+    /// 遍历当前的unit列表，查找指定unitID的unit对象
+    /// </summary>
+    /// <param name="createID"></param>
+    /// <returns></returns>
 	public GameObjectUnit FindUnitInTiles(int createID)
 	{
 		int count = this.tiles.Count;
@@ -993,7 +1053,11 @@ public class GameScene
 		}
 		return null;
 	}
-
+    /// <summary>
+    /// 根据unit名称查找unit对象
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
 	public GameObjectUnit FindUnit(string name)
 	{
 		if (!name.Contains("Unit_"))
@@ -1019,7 +1083,11 @@ public class GameScene
 		}
 		return null;
 	}
-
+    /// <summary>
+    /// 遍历unit列表，获取第一个指定类型的unit对象
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
 	public GameObjectUnit FindFirstUnit(int type)
 	{
 		int count = this.units.Count;
@@ -1032,7 +1100,11 @@ public class GameScene
 		}
 		return null;
 	}
-
+    /// <summary>
+    /// 根据id，从unit映射列表中找到指定Unit
+    /// </summary>
+    /// <param name="cID"></param>
+    /// <returns></returns>
 	public GameObjectUnit FindUnit(int cID)
 	{
 		if (this.unitsMap.ContainsKey(cID))
@@ -1041,12 +1113,19 @@ public class GameScene
 		}
 		return null;
 	}
-
+    /// <summary>
+    /// 判断当前的unit映射中是否存在指定unit对象
+    /// </summary>
+    /// <param name="unit"></param>
+    /// <returns></returns>
 	public bool ContainUnit(GameObjectUnit unit)
 	{
 		return this.unitsMap.ContainsKey(unit.createID);
 	}
-
+    /// <summary>
+    /// 编辑器中根据unit名称删除指定unit对象
+    /// </summary>
+    /// <param name="name"></param>
 	public void RemoveUnitInEditor(string name)
 	{
 		GameObjectUnit gameObjectUnit = this.FindUnit(name);
@@ -1055,16 +1134,16 @@ public class GameScene
 			return;
 		}
 		gameObjectUnit.ClearTiles();
-		for (int i = 0; i < this.tiles.Count; i++)
+		for (int i = 0; i < this.tiles.Count; i++)    //移除当前unit列表中unit中关于指定unit对象的引用
 		{
 			this.tiles[i].RemoveUnit(gameObjectUnit);
 		}
-		if (gameObjectUnit.ins != null)
+		if (gameObjectUnit.ins != null)               //销毁Gameobject对象
 		{
 			DelegateProxy.DestroyObjectImmediate(gameObjectUnit.ins);
 		}
-		this.unitsMap.Remove(gameObjectUnit.createID);
-		this.units.Remove(gameObjectUnit);
+		this.unitsMap.Remove(gameObjectUnit.createID);      //从映射中移除
+		this.units.Remove(gameObjectUnit);                  //从列表移除
 		this.unitCount--;
 	}
 
@@ -1723,7 +1802,9 @@ public class GameScene
 			paths = new List<Vector3>();
 		}
 	}
-
+    /// <summary>
+    /// 刷新shader全局常量   --有待研究
+    /// </summary>
 	public void UpdateShaderConstant()
 	{
 		if (GameScene.lightmapCorrectOn != this._oldLightmapCorrectOn)
@@ -1859,7 +1940,10 @@ public class GameScene
 		}
 		return (float)this.curPreLoadCount / (float)this.preloadUnitAssetPathList.Count;
 	}
-
+    /// <summary>
+    /// 根据视点更新视图
+    /// </summary>
+    /// <param name="eyePos"></param>
 	public void UpdateView(Vector3 eyePos)
 	{
         //等待需要销毁，不进行更新视图逻辑
@@ -2171,7 +2255,7 @@ public class GameScene
 				{
 					region = this.regionsMap[i + "_" + j];                 //有就直接获取
 				}
-				if (region == null)                                        //如果没有,创建
+				if (region == null)                                        //如果映射中没有,创建
 				{
 					string path = string.Empty;
                     //加载资源
@@ -2225,23 +2309,24 @@ public class GameScene
 						this.regionsMap.Add(region.regionX + "_" + region.regionY, region);
 					}
 				}
-				else if (GameScene.dontCullUnit)
+				else if (GameScene.dontCullUnit)  //映射中已有引用，如果不剔除unit
 				{
-					if (!flag)
+					if (!flag)                    //映射中没有指定region引用，加入队列,意思是如果不剔除，所有的Region都要添加
 					{
 						this.regions.Add(region);
 					}
 				}
-				else
+				else            //映射中有索引，如果剔除unit，并且映射中没有引用指定region，网格中的region需要添加到队列
 				{
 					this.regions.Add(region);
 				}
 			}
 		}
-		if (!GameScene.dontCullUnit)
+		if (!GameScene.dontCullUnit)   //如果需要剔除，清空映射容器 ,也就是说剔除unit模式情况下，实际只在内存中保存X宫格的所有region的引用
 		{
 			this.regionsMap.Clear();
 		}
+        //将region队列中的region都加入region映射中
 		for (int i = 0; i < this.regions.Count; i++)
 		{
 			this.regKey = this.regions[i].regionX + "_" + this.regions[i].regionY;
@@ -2253,16 +2338,20 @@ public class GameScene
 		int count = this.regions.Count;
 		for (int i = 0; i < count; i++)
 		{
-			this.regions[i].Update(this.eyePos);
+			this.regions[i].Update(this.eyePos);   //遍历更新X宫格中的所有Region逻辑
 		}
 	}
-
+    /// <summary>
+    /// 更新视图属性，逐级刷新跟剔除激活相关的属性   Region -> tile  ->unit ->dynamicUnit
+    /// </summary>
 	public void UpdateViewRange()
 	{
+        //更新X宫格所有的Region视图中tile视野更新
 		for (int i = 0; i < this.regions.Count; i++)
 		{
 			this.regions[i].UpdateViewRange();
 		}
+        //更新当前Region中，角色视域中的unit的激活距离和剔除距离
 		for (int i = 0; i < this.units.Count; i++)
 		{
 			if (this.units[i].isStatic)
@@ -2270,6 +2359,7 @@ public class GameScene
 				this.units[i].UpdateViewRange();
 			}
 		}
+        //更新动态unit的激活距离和剔除距离
 		for (int j = 0; j < this.dynamicUnits.Count; j++)
 		{
 			GameObjectUnit gameObjectUnit = this.dynamicUnits[j];
@@ -2277,7 +2367,9 @@ public class GameScene
 			gameObjectUnit.far = gameObjectUnit.near + 2f;
 		}
 	}
-
+    /// <summary>
+    /// 更新tile列表
+    /// </summary>
 	private void UpdateTiles()
 	{
 		int num = this.tiles.Count;
