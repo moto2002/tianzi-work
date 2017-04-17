@@ -28,15 +28,25 @@ public class GameScene
 	private int sceneLoadUnitTick;
 
 	public static bool isPlaying = false;
-
+    /// <summary>
+    /// 随机码
+    /// </summary>
 	public float randomCode;
-
+    /// <summary>
+    /// update更新频率
+    /// </summary>
 	private float updateInterval = 0.2f;
-
+    /// <summary>
+    /// 上次更新计时
+    /// </summary>
 	private float lastInterval = Time.realtimeSinceStartup;
-
+    /// <summary>
+    /// 帧计数
+    /// </summary>
 	private int frames;
-
+    /// <summary>
+    /// 当前的fps值
+    /// </summary>
 	public float fps = 30f;
 
 	public float ms = 1f;
@@ -48,7 +58,9 @@ public class GameScene
     /// 分帧处理，优化性能
     /// </summary>
 	private int tick;
-
+    /// <summary>
+    /// 视距Region网格的宽度,默认为1，为九宫格
+    /// </summary>
 	private int viewRect = 1;
 
 	public int targetFrameRate = 25;
@@ -1985,7 +1997,7 @@ public class GameScene
 			{
 				this.frames++;
 				float num2 = Time.time;
-				if (num2 > this.lastInterval + this.updateInterval)
+				if (num2 > this.lastInterval + this.updateInterval)    //场景运行时，按更新时间间隔进行fps刷新
 				{
 					this.fps = (float)this.frames / (num2 - this.lastInterval);
 					this.ms = 1000f / Mathf.Max(this.fps, 1E-05f);
@@ -1999,9 +2011,9 @@ public class GameScene
 			}
 			else
 			{
-				this.fps = 30f;
+				this.fps = 30f;  //场景没有运行，fps默认30
 			}
-			if (this.tick == 0)
+			if (this.tick == 0)   //计时开始，进行光照贴图加载，及相关参数初始化
 			{
 				this.LoadLightmap();
 				this._oldLightmapCorrectOn = !GameScene.lightmapCorrectOn;
@@ -2111,13 +2123,16 @@ public class GameScene
 		this.loadProgress = 0f;
 		this.oldSceneLoadUnitTick = 0;
 	}
-
+    /// <summary>
+    /// 根据视点和视距更新当前场景需要的Region网格列表 ，视点所在Region为网格中心
+    /// </summary>
 	private void UpdateRegions()
 	{
 		float num = Mathf.Abs(this.eyePos.x);
 		float num2 = Mathf.Abs(this.eyePos.z);
-		float num3 = num / this.eyePos.x;
-		float num4 = num2 / this.eyePos.z;
+		float num3 = num / this.eyePos.x;     //符号，+/-
+		float num4 = num2 / this.eyePos.z;    //符号，+/-
+        //如果视点在边界点，则使用边界Region值
 		if (this.eyePos.x == 0f)
 		{
 			this.curRegionX = 0;
@@ -2142,23 +2157,24 @@ public class GameScene
 		num7 = -1;
 		num6 = 1;
 		num8 = 1;
-		if (!GameScene.dontCullUnit)
+		if (!GameScene.dontCullUnit) //如果场景没有剔除unit，清空Region列表缓存
 		{
 			this.regions.Clear();
 		}
-		for (int i = num5; i <= num6; i++)
+		for (int i = num5; i <= num6; i++)      //遍历当前视域网格
 		{
 			for (int j = num7; j <= num8; j++)
 			{
 				Region region = null;
-				bool flag = this.regionsMap.ContainsKey(i + "_" + j);
+				bool flag = this.regionsMap.ContainsKey(i + "_" + j);    //检查Region映射有无指定Region缓存
 				if (flag)
 				{
-					region = this.regionsMap[i + "_" + j];
+					region = this.regionsMap[i + "_" + j];                 //有就直接获取
 				}
-				if (region == null)
+				if (region == null)                                        //如果没有,创建
 				{
 					string path = string.Empty;
+                    //加载资源
 					Asset asset;
 					if (!GameScene.isPlaying)
 					{
@@ -2195,6 +2211,7 @@ public class GameScene
 							asset = AssetLibrary.Load(path, AssetType.Region, LoadType.Type_Resources);
 						}
 					}
+                    //将Region加入队列和映射引用中
 					if (asset.loaded)
 					{
 						region = asset.region;
