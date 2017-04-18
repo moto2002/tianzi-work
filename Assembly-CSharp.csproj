@@ -31,9 +31,6 @@
     <Reference Include="UnityEngine">
       <HintPath>..\tianzi_yoyou.com\assets\bin\Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
-    <Reference Include="LibLoader">
-      <HintPath>..\tianzi_yoyou.com\assets\bin\Data\Managed\LibLoader.dll</HintPath>
-    </Reference>
     <Reference Include="System.Core">
       <HintPath>..\tianzi_yoyou.com\assets\bin\Data\Managed\System.Core.dll</HintPath>
     </Reference>
@@ -43,9 +40,6 @@
     </Reference>
     <Reference Include="uSequencerRuntime">
       <HintPath>..\tianzi_yoyou.com\assets\bin\Data\Managed\uSequencerRuntime.dll</HintPath>
-    </Reference>
-    <Reference Include="SharedRuntime">
-      <HintPath>..\tianzi_yoyou.com\assets\bin\Data\Managed\SharedRuntime.dll</HintPath>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\tianzi_yoyou.com\assets\bin\Data\Managed\ICSharpCode.SharpZipLib.dll</HintPath>
@@ -571,6 +565,16 @@
     <Compile Include="XMLNodeList.cs" />
     <Compile Include="XMLParser.cs" />
     <Compile Include="_CameraShake.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="LibLoader.csproj">
+      <Project>{b9cb867e-b6a2-4c39-8c10-73109ea3c316}</Project>
+      <Name>LibLoader</Name>
+    </ProjectReference>
+    <ProjectReference Include="SharedRuntime.csproj">
+      <Project>{17c55365-840d-49a7-8b7a-523074ae7507}</Project>
+      <Name>SharedRuntime</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

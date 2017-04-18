@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{17C55365-840D-49A7-8B7A-523074AE7507}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <OutputType>Library</OutputType>
+    <AssemblyName>SharedRuntime</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="UnityEngine" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AccountExtensions.cs" />
+    <Compile Include="GOExtensions.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WellFired.Data\DataBaseEntry.cs" />
+    <Compile Include="WellFired.Data\DataComponent.cs" />
+    <Compile Include="WellFired.Data\HUDData.cs" />
+    <Compile Include="WellFired.Initialization\ContextInitializer.cs" />
+    <Compile Include="WellFired.Initialization\IInitializationContext.cs" />
+    <Compile Include="WellFired.Shared\ArrayExtensions.cs" />
+    <Compile Include="WellFired.Shared\DoubleEasing.cs" />
+    <Compile Include="WellFired.Shared\Easing.cs" />
+    <Compile Include="WellFired.Shared\GizmosChangeColor.cs" />
+    <Compile Include="WellFired.Shared\GUIBeginArea.cs" />
+    <Compile Include="WellFired.Shared\GUIBeginHorizontal.cs" />
+    <Compile Include="WellFired.Shared\GUIBeginScrollView.cs" />
+    <Compile Include="WellFired.Shared\GUIBeginVertical.cs" />
+    <Compile Include="WellFired.Shared\GUIChangeColor.cs" />
+    <Compile Include="WellFired.Shared\GUIChangeContentColor.cs" />
+    <Compile Include="WellFired.Shared\GUIEnable.cs" />
+    <Compile Include="WellFired.Shared\IIOHelper.cs" />
+    <Compile Include="WellFired.Shared\IReflectionHelper.cs" />
+    <Compile Include="WellFired.Shared\PlatformSpecificFactory.cs" />
+    <Compile Include="WellFired.Shared\StringExtensions.cs" />
+    <Compile Include="WellFired.Shared\UIExtensions.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

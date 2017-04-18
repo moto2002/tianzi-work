@@ -1,154 +1,185 @@
 using System;
 using UnityEngine;
 
-[AddComponentMenu(""), ExecuteInEditMode, RequireComponent(typeof(Camera))]
-public abstract class PostEffectsBase : MonoBehaviour
+[ExecuteInEditMode, RequireComponent(typeof(Camera))]
+[Serializable]
+public class PostEffectsBase : MonoBehaviour
 {
-	protected bool supportHDRTextures = true;
+	protected bool supportHDRTextures;
 
 	protected bool supportDX11;
 
-	protected bool isSupported = true;
+	protected bool isSupported;
 
-	private bool mStarted;
-
-	public Material CheckShaderAndCreateMaterial(Shader s, Material m2Create)
+	public PostEffectsBase()
 	{
-		if (s == null)
-		{
-			Debug.Log("Missing shader in " + base.name);
-			base.enabled = false;
-			return null;
-		}
-		if (s.isSupported && m2Create && m2Create.shader == s)
-		{
-			return m2Create;
-		}
-		if (!s.isSupported)
-		{
-			this.NotSupported();
-			Debug.Log(string.Concat(new string[]
-			{
-				"The shader ",
-				s.ToString(),
-				" on effect ",
-				this.ToString(),
-				" is not supported on this platform!"
-			}));
-			return null;
-		}
-		m2Create = new Material(s);
-		m2Create.hideFlags = HideFlags.DontSave;
-		if (m2Create)
-		{
-			return m2Create;
-		}
-		return null;
+		this.supportHDRTextures = true;
+		this.isSupported = true;
 	}
 
-	public Material CreateMaterial(Shader s, Material m2Create)
+	public override Material CheckShaderAndCreateMaterial(Shader s, Material m2Create)
 	{
-		if (s == null)
+		Material arg_CF_0;
+		if (!s)
 		{
 			Debug.Log("Missing shader in " + this.ToString());
-			return null;
+			this.enabled = false;
+			arg_CF_0 = null;
 		}
-		if (m2Create != null && m2Create.shader == s && s.isSupported)
+		else if (s.isSupported && m2Create && m2Create.shader == s)
 		{
-			return m2Create;
+			arg_CF_0 = m2Create;
 		}
-		if (!s.isSupported)
+		else if (!s.isSupported)
 		{
-			return null;
+			this.NotSupported();
+			Debug.Log("The shader " + s.ToString() + " on effect " + this.ToString() + " is not supported on this platform!");
+			arg_CF_0 = null;
 		}
-		m2Create = new Material(s);
-		m2Create.hideFlags = HideFlags.DontSave;
-		if (m2Create)
+		else
 		{
-			return m2Create;
+			m2Create = new Material(s);
+			m2Create.hideFlags = HideFlags.DontSave;
+			arg_CF_0 = ((!m2Create) ? null : m2Create);
 		}
-		return null;
+		return arg_CF_0;
 	}
 
-	public bool CheckSupport()
+	public override Material CreateMaterial(Shader s, Material m2Create)
+	{
+		Material arg_8E_0;
+		if (!s)
+		{
+			Debug.Log("Missing shader in " + this.ToString());
+			arg_8E_0 = null;
+		}
+		else if (m2Create && m2Create.shader == s && s.isSupported)
+		{
+			arg_8E_0 = m2Create;
+		}
+		else if (!s.isSupported)
+		{
+			arg_8E_0 = null;
+		}
+		else
+		{
+			m2Create = new Material(s);
+			m2Create.hideFlags = HideFlags.DontSave;
+			arg_8E_0 = ((!m2Create) ? null : m2Create);
+		}
+		return arg_8E_0;
+	}
+
+	public override void OnEnable()
+	{
+		this.isSupported = true;
+	}
+
+	public override bool CheckSupport()
 	{
 		return this.CheckSupport(false);
 	}
 
-	public abstract bool CheckResources();
+	public override bool CheckResources()
+	{
+		Debug.LogWarning("CheckResources () for " + this.ToString() + " should be overwritten.");
+		return this.isSupported;
+	}
 
-	public bool CheckSupport(bool needDepth)
+	public override void Start()
+	{
+		this.CheckResources();
+	}
+
+	public override bool CheckSupport(bool needDepth)
 	{
 		this.isSupported = true;
 		this.supportHDRTextures = SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf);
-		this.supportDX11 = (SystemInfo.graphicsShaderLevel >= 50 && SystemInfo.supportsComputeShaders);
+		bool arg_2C_1;
+		if (arg_2C_1 = (SystemInfo.graphicsShaderLevel >= 50))
+		{
+			arg_2C_1 = SystemInfo.supportsComputeShaders;
+		}
+		this.supportDX11 = arg_2C_1;
+		bool arg_8D_0;
 		if (!SystemInfo.supportsImageEffects || !SystemInfo.supportsRenderTextures)
 		{
 			this.NotSupported();
-			return false;
+			arg_8D_0 = false;
 		}
-		if (needDepth && !SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth))
+		else if (needDepth && !SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth))
 		{
 			this.NotSupported();
-			return false;
+			arg_8D_0 = false;
 		}
-		if (needDepth)
+		else
 		{
-			base.camera.depthTextureMode |= DepthTextureMode.Depth;
+			if (needDepth)
+			{
+				this.camera.depthTextureMode = (this.camera.depthTextureMode | DepthTextureMode.Depth);
+			}
+			arg_8D_0 = true;
 		}
-		return true;
+		return arg_8D_0;
 	}
 
-	public bool CheckSupport(bool needDepth, bool needHdr)
+	public override bool CheckSupport(bool needDepth, bool needHdr)
 	{
+		bool arg_30_0;
 		if (!this.CheckSupport(needDepth))
 		{
-			return false;
+			arg_30_0 = false;
 		}
-		if (needHdr && !this.supportHDRTextures)
+		else if (needHdr && !this.supportHDRTextures)
 		{
 			this.NotSupported();
-			return false;
+			arg_30_0 = false;
 		}
-		return true;
+		else
+		{
+			arg_30_0 = true;
+		}
+		return arg_30_0;
 	}
 
-	public bool Dx11Support()
+	public override bool Dx11Support()
 	{
 		return this.supportDX11;
 	}
 
-	public void ReportAutoDisable()
+	public override void ReportAutoDisable()
 	{
 		Debug.LogWarning("The image effect " + this.ToString() + " has been disabled as it's not supported on the current platform.");
 	}
 
-	public bool CheckShader(Shader s)
+	public override bool CheckShader(Shader s)
 	{
-		Debug.Log(string.Concat(new string[]
-		{
-			"The shader ",
-			s.ToString(),
-			" on effect ",
-			this.ToString(),
-			" is not part of the Unity 3.2+ effects suite anymore. For best performance and quality, please ensure you are using the latest Standard Assets Image Effects (Pro only) package."
-		}));
+		Debug.Log("The shader " + s.ToString() + " on effect " + this.ToString() + " is not part of the Unity 3.2+ effects suite anymore. For best performance and quality, please ensure you are using the latest Standard Assets Image Effects (Pro only) package.");
+		bool arg_51_0;
 		if (!s.isSupported)
 		{
 			this.NotSupported();
-			return false;
+			arg_51_0 = false;
 		}
-		return false;
+		else
+		{
+			arg_51_0 = false;
+		}
+		return arg_51_0;
 	}
 
-	public void NotSupported()
+	public override void NotSupported()
 	{
-		base.enabled = false;
+		this.enabled = false;
 		this.isSupported = false;
 	}
 
-	public void DrawBorder(RenderTexture dest, Material material)
+	public override void DrawBorder(RenderTexture dest, Material material)
 	{
+		float x = 0f;
+		float x2 = 0f;
+		float y = 0f;
+		float y2 = 0f;
 		RenderTexture.active = dest;
 		bool flag = true;
 		GL.PushMatrix();
@@ -156,83 +187,73 @@ public abstract class PostEffectsBase : MonoBehaviour
 		for (int i = 0; i < material.passCount; i++)
 		{
 			material.SetPass(i);
-			float y;
-			float y2;
+			float y3 = 0f;
+			float y4 = 0f;
 			if (flag)
 			{
-				y = 1f;
-				y2 = 0f;
+				y3 = 1f;
+				y4 = (float)0;
 			}
 			else
 			{
-				y = 0f;
-				y2 = 1f;
+				y3 = (float)0;
+				y4 = 1f;
 			}
-			float x = 0f;
-			float x2 = 0f + 1f / ((float)dest.width * 1f);
-			float y3 = 0f;
-			float y4 = 1f;
+			x = (float)0;
+			x2 = (float)0 + 1f / ((float)dest.width * 1f);
+			y = (float)0;
+			y2 = 1f;
 			GL.Begin(7);
-			GL.TexCoord2(0f, y);
-			GL.Vertex3(x, y3, 0.1f);
-			GL.TexCoord2(1f, y);
-			GL.Vertex3(x2, y3, 0.1f);
-			GL.TexCoord2(1f, y2);
-			GL.Vertex3(x2, y4, 0.1f);
-			GL.TexCoord2(0f, y2);
-			GL.Vertex3(x, y4, 0.1f);
+			GL.TexCoord2((float)0, y3);
+			GL.Vertex3(x, y, 0.1f);
+			GL.TexCoord2(1f, y3);
+			GL.Vertex3(x2, y, 0.1f);
+			GL.TexCoord2(1f, y4);
+			GL.Vertex3(x2, y2, 0.1f);
+			GL.TexCoord2((float)0, y4);
+			GL.Vertex3(x, y2, 0.1f);
 			x = 1f - 1f / ((float)dest.width * 1f);
 			x2 = 1f;
-			y3 = 0f;
-			y4 = 1f;
-			GL.TexCoord2(0f, y);
-			GL.Vertex3(x, y3, 0.1f);
-			GL.TexCoord2(1f, y);
-			GL.Vertex3(x2, y3, 0.1f);
-			GL.TexCoord2(1f, y2);
-			GL.Vertex3(x2, y4, 0.1f);
-			GL.TexCoord2(0f, y2);
-			GL.Vertex3(x, y4, 0.1f);
-			x = 0f;
+			y = (float)0;
+			y2 = 1f;
+			GL.TexCoord2((float)0, y3);
+			GL.Vertex3(x, y, 0.1f);
+			GL.TexCoord2(1f, y3);
+			GL.Vertex3(x2, y, 0.1f);
+			GL.TexCoord2(1f, y4);
+			GL.Vertex3(x2, y2, 0.1f);
+			GL.TexCoord2((float)0, y4);
+			GL.Vertex3(x, y2, 0.1f);
+			x = (float)0;
 			x2 = 1f;
-			y3 = 0f;
-			y4 = 0f + 1f / ((float)dest.height * 1f);
-			GL.TexCoord2(0f, y);
-			GL.Vertex3(x, y3, 0.1f);
-			GL.TexCoord2(1f, y);
-			GL.Vertex3(x2, y3, 0.1f);
-			GL.TexCoord2(1f, y2);
-			GL.Vertex3(x2, y4, 0.1f);
-			GL.TexCoord2(0f, y2);
-			GL.Vertex3(x, y4, 0.1f);
-			x = 0f;
+			y = (float)0;
+			y2 = (float)0 + 1f / ((float)dest.height * 1f);
+			GL.TexCoord2((float)0, y3);
+			GL.Vertex3(x, y, 0.1f);
+			GL.TexCoord2(1f, y3);
+			GL.Vertex3(x2, y, 0.1f);
+			GL.TexCoord2(1f, y4);
+			GL.Vertex3(x2, y2, 0.1f);
+			GL.TexCoord2((float)0, y4);
+			GL.Vertex3(x, y2, 0.1f);
+			x = (float)0;
 			x2 = 1f;
-			y3 = 1f - 1f / ((float)dest.height * 1f);
-			y4 = 1f;
-			GL.TexCoord2(0f, y);
-			GL.Vertex3(x, y3, 0.1f);
-			GL.TexCoord2(1f, y);
-			GL.Vertex3(x2, y3, 0.1f);
-			GL.TexCoord2(1f, y2);
-			GL.Vertex3(x2, y4, 0.1f);
-			GL.TexCoord2(0f, y2);
-			GL.Vertex3(x, y4, 0.1f);
+			y = 1f - 1f / ((float)dest.height * 1f);
+			y2 = 1f;
+			GL.TexCoord2((float)0, y3);
+			GL.Vertex3(x, y, 0.1f);
+			GL.TexCoord2(1f, y3);
+			GL.Vertex3(x2, y, 0.1f);
+			GL.TexCoord2(1f, y4);
+			GL.Vertex3(x2, y2, 0.1f);
+			GL.TexCoord2((float)0, y4);
+			GL.Vertex3(x, y2, 0.1f);
 			GL.End();
 		}
 		GL.PopMatrix();
 	}
 
-	private void OnEnable()
+	public override void Main()
 	{
-		if (this.mStarted)
-		{
-			this.CheckResources();
-		}
-	}
-
-	protected virtual void Start()
-	{
-		this.mStarted = true;
-		this.CheckResources();
 	}
 }

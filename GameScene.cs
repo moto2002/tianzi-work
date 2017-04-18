@@ -16,7 +16,9 @@ public class GameScene
 	public GameScene.SceneLoadCompleBack sceneLoadCompleListener;
 
 	public GameScene.SceneLoadingBack sceneLoadingListener;
-
+    /// <summary>
+    /// 进度计数
+    /// </summary>
 	public float loadProgress;
     /// <summary>
     /// 场景是否加载完成
@@ -68,7 +70,9 @@ public class GameScene
 	private Dictionary<string, Region> regionsMap = new Dictionary<string, Region>();
 
 	public List<Region> regions;
-
+    /// <summary>
+    /// 视点位置，也就是主角色所在的地面位置
+    /// </summary>
 	public Vector3 eyePos = Vector3.zero;
     /// <summary>
     /// 视点所在Region的X坐标
@@ -96,7 +100,9 @@ public class GameScene
 	private Dictionary<string, Tile> tilesMap;
 
 	public List<Tile> tiles;
-
+    /// <summary>
+    /// 当前视点所在tile
+    /// </summary>
 	public Tile curTile;
     /// <summary>
     /// 不剔除unit
@@ -203,7 +209,9 @@ public class GameScene
     /// 是否启用后期处理效果
     /// </summary>
 	public static bool postEffectEnable = true;
-
+    /// <summary>
+    /// 后期处理效果是否更新标记
+    /// </summary>
 	private bool breset;
     /// <summary>
     /// 后期处理效果配置是否已经加载完成
@@ -270,7 +278,7 @@ public class GameScene
     /// </summary>
 	private int curPreLoadCount;
     /// <summary>
-    /// 检测没有bake的光照贴图进行bake一次可以bake的数量
+    /// 检测没有bake的光照贴图进行bake一次tick可以bake的数量
     /// </summary>
 	private int perTerBakeCount = 1;
     /// <summary>
@@ -602,14 +610,17 @@ public class GameScene
 	{
 		return null;
 	}
-
+    /// <summary>
+    /// 变更后期处理效果开关状态
+    /// </summary>
+    /// <param name="value"></param>
 	public void ActivePostEffect(bool value)
 	{
 		if (!GameScene.isPlaying)
 		{
 			return;
 		}
-		if (this.breset && GameScene.postEffectEnable == value)
+		if (this.breset && GameScene.postEffectEnable == value)  //后期处理效果开关状态变化，才进入处理逻辑  ,否则无操作
 		{
 			return;
 		}
@@ -618,7 +629,7 @@ public class GameScene
 		{
 			return;
 		}
-		this.breset = true;
+		this.breset = true;   //更新后期处理效果后的标记
 		this.peConfigLoaded = true;
 		for (int i = 0; i < this.postEffectsList.Count; i++)
 		{
@@ -631,7 +642,7 @@ public class GameScene
 			}
 			if (monoBehaviour != null)
 			{
-				if (value && this.peConfig.ContainsKey(text))
+				if (value && this.peConfig.ContainsKey(text))      //根据开关状态，激活所有后期效果或关闭效果
 				{
 					monoBehaviour.enabled = true;
 				}
@@ -1951,7 +1962,7 @@ public class GameScene
 		LightmapSettings.lightmaps = lightmaps;
 	}
     /// <summary>
-    /// 预加载进度获取
+    /// 预加载完成进度比率获取
     /// </summary>
     /// <returns></returns>
 	private float PreLoadProgress()
@@ -2024,7 +2035,7 @@ public class GameScene
             //场景数据未加载完成
 			if (!this.loadSceneComplate)
 			{
-                //如果保存的场景加载tick技术小于场景加载单位总tick数
+                //如果保存的场景加载tick计数小于场景加载单位总tick数
 				if (this.oldSceneLoadUnitTick < this.sceneLoadUnitTick)
 				{
                     //加载进度信息更新
@@ -2101,9 +2112,9 @@ public class GameScene
 			this.viewDir.Normalize();
 			if (!this.peConfigLoaded)
 			{
-				this.LoadPostEffectConfig();
+				this.LoadPostEffectConfig();         //加载后期处理效果
 			}
-			this.UpdateShaderConstant();
+			this.UpdateShaderConstant();             //更新shader恒变量
 			if (GameScene.isPlaying)
 			{
 				this.frames++;
@@ -2140,7 +2151,7 @@ public class GameScene
 			{
 				this.mapPath.Update();
 			}
-			if (this.tick % 5 == 0)
+			if (this.tick % 5 == 0)   //更新后期效果启用状态
 			{
 				if (GameScene.isEditor)
 				{
@@ -2160,14 +2171,14 @@ public class GameScene
 			this.UpdateUnits();
 			if (GameScene.isPlaying)
 			{
-				if (this.tick % 5 == 0 && Vector3.Distance(eyePos, this.lastPos) > 6f)
+				if (this.tick % 5 == 0 && Vector3.Distance(eyePos, this.lastPos) > 6f)     //游戏运行时，五次tick并且视点相比上次移动超过一定距离，更新Region列表信息 ,优化性能
 				{
-					Tile tileAt = this.GetTileAt(eyePos);
+					Tile tileAt = this.GetTileAt(eyePos);                                  //获取视点当前所在tile
 					if (tileAt != this.curTile)
 					{
 						this.UpdateRegions();
 						this.curTile = tileAt;
-					}
+					}                                                                      //记录当前的视点位置
 					this.lastPos = eyePos;
 				}
 			}
@@ -2183,6 +2194,7 @@ public class GameScene
 				{
 					for (int i = 0; i < this.tiles.Count; i++)
 					{
+                        //tile的地形渲染已启用，地形贴图索引为空，视距小于指定距离，需进行bake
 						if (this.tiles[i].terrain != null && this.tiles[i].terrain.terrainRenderer.enabled && this.tiles[i].terrain.terrainMapIndex < 0 && this.tiles[i].viewDistance < 33f)
 						{
 							this.tiles[i].terrain.Bake();
@@ -2195,7 +2207,8 @@ public class GameScene
 			this.tick++;
 			return;
 		}
-		if (this.preloadTick == 0)
+        //需要加载并且没有加载完成，才进行往下进行  ,以下都是加载
+		if (this.preloadTick == 0)     //首个tick,计算预加载所需的总tick数
 		{
 			if (this.preloadUnitAssetPathList.Count < 1)
 			{
@@ -2207,20 +2220,20 @@ public class GameScene
 		float num3 = this.PreLoadProgress() * this.preloadMaxProgress;
 		if (this.loadProgress < num3)
 		{
-			this.loadProgress += this.progressInc;
+			this.loadProgress += this.progressInc;  //显示进度增长是逐步完成的
 			return;
 		}
-		this.progressInc = 0.01f;
+		this.progressInc = 0.01f;                   //显示进度追上预加载进度，进行下一批预加载
 		if (this.preloadTick % this.preloadInterval == 0) //一定间隔进行一次预加载
 		{
 			this.Preoad();
 		}
 		this.preloadTick++;
-		if (this.preloadTick % 2 == 0)
+		if (this.preloadTick % 2 == 0)              //一定次数tick检测以下预加载是否完成
 		{
 			this.CheckPreLoadComplate();
 		}
-		if (this.preloadTick > this.preloadMaxTick)
+		if (this.preloadTick > this.preloadMaxTick) //如果tick达到预加载的最大tick数，默认夹杂完成
 		{
 			this.preloadComplate = true;
 		}
