@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{85DA374A-C2D9-4258-A40F-129E67F46BB2}</ProjectGuid>
@@ -25,8 +25,12 @@
     <Optimize>true</Optimize>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="UnityEngine" />
-    <Reference Include="Boo.Lang" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\tianzi_yoyou.com\assets\bin\Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="Boo.Lang">
+      <HintPath>..\tianzi_yoyou.com\assets\bin\Data\Managed\Boo.Lang.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PostEffectsBase.cs" />
