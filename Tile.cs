@@ -474,7 +474,7 @@ public class Tile
 		});
 	}
     /// <summary>
-    /// 根据视点更新瓦片状态
+    /// 根据视点更新瓦片状态 ,如X宫格相关的tile，水体效果,unit列表状态等
     /// </summary>
     /// <param name="eyePos"></param>
 	public void Update(Vector3 eyePos)

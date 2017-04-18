@@ -39,7 +39,9 @@ public class DynamicUnit : GameObjectUnit
 	private float mfEaseTime = 2f;
 
 	public Vector3 start;
-
+    /// <summary>
+    /// unit移动的目标位置
+    /// </summary>
 	public Vector3 target;
 
 	private Vector3 step;
@@ -148,7 +150,10 @@ public class DynamicUnit : GameObjectUnit
 	{
 		this.isStatic = false;
 	}
-
+    
+    /// <summary>
+    /// 销毁动态unit游戏对象,清理各种数据及引用
+    /// </summary>
 	public override void Destroy()
 	{
 		if (this.renderers != null)
@@ -161,7 +166,7 @@ public class DynamicUnit : GameObjectUnit
 				}
 			}
 		}
-		if (this.replaceMats != null)
+		if (this.replaceMats != null)  //清理替换材质列表
 		{
 			this.replaceMats.Clear();
 			this.replaceMats = null;
@@ -171,7 +176,7 @@ public class DynamicUnit : GameObjectUnit
 			this.oriMats.Clear();
 			this.oriMats = null;
 		}
-		if (this.renderers != null)
+		if (this.renderers != null)    //清理渲染器列表
 		{
 			this.renderers.Clear();
 			this.renderers = null;
@@ -776,7 +781,9 @@ public class DynamicUnit : GameObjectUnit
 		this.mfEaseTime = time;
 		this.scene.mapPath.SetDynamicCollision(this.position, size, true, 1);
 	}
-
+    /// <summary>
+    /// 更新向目标点强制移动
+    /// </summary>
 	public void UpdateForce()
 	{
 		this.mfCurEaseTime += Time.deltaTime;

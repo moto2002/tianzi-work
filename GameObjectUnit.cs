@@ -12,9 +12,13 @@ public class GameObjectUnit
 	public delegate void ActiveListener(bool value);
 
 	public delegate void ThridPardResourManager(string strFileName, AssetCallBack back);
-
+    /// <summary>
+    /// 当前是作为主角的unit
+    /// </summary>
 	public bool isMainUint;
-
+    /// <summary>
+    /// 是否待移除
+    /// </summary>
 	public bool willRemoved;
 
 	public int lightmapSize = 128;
@@ -30,7 +34,9 @@ public class GameObjectUnit
 	public int createID;
 
 	public string name = string.Empty;
-
+    /// <summary>
+    ///   是否有碰撞器
+    /// </summary>
 	public bool isCollider = true;
 
 	public GameObject ins;
@@ -285,7 +291,7 @@ public class GameObjectUnit
     /// </summary>
 	protected GameObject bornEffect;
     /// <summary>
-    /// unit相关网格坐标数组
+    /// unit相关网格阻塞格子坐标数组
     /// </summary>
 	public int[,] grids
 	{
@@ -601,7 +607,7 @@ public class GameObjectUnit
 		this._rotationDirty = true;
 	}
     /// <summary>
-    /// 状态更新
+    /// 状态更新,计算阻塞的tile，更新unit的位置状态等
     /// </summary>
 	public virtual void Update()
 	{
@@ -615,7 +621,7 @@ public class GameObjectUnit
 			this.position = this.ins.transform.position;
 			this.rotation = this.ins.transform.rotation;
 			this.localScale = this.ins.transform.localScale;
-			this.unitParser.Update(this.ins);
+			this.unitParser.Update(this.ins);  //通过解析器解析的数据更新unit游戏对象
 		}
 		this.tick++;
 	}

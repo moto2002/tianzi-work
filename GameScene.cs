@@ -328,11 +328,11 @@ public class GameScene
     /// </summary>
 	public int visibleStaticUnitCount;
     /// <summary>
-    /// 每帧更新的可视动态unit数量限制
+    /// 每帧更新的可视动态unit数量计数
     /// </summary>
 	private int visibleDynaUnitPerFrame;
     /// <summary>
-    /// 每帧更新的可视静态unit数量限制
+    /// 每帧更新的可视静态unit数量计数
     /// </summary>
 	private int visibleStaticUnitPerFrame;
     /// <summary>
@@ -343,7 +343,9 @@ public class GameScene
     /// 动态单位的数量上限
     /// </summary>
 	public static int maxDynaUnit = 50;
-
+    /// <summary>
+    /// 可视的静态unit类型计数
+    /// </summary>
 	public int visibleStaticTypeCount;
     /// <summary>
     /// 当前的动态unit列表
@@ -361,9 +363,13 @@ public class GameScene
 	private float dz;
 
 	private List<GameObjectUnit> shadowUnits = new List<GameObjectUnit>();
-
+    /// <summary>
+    /// 当前可以接受阴影的unit最大数量
+    /// </summary>
 	public int maxCastShadowsUnitCount = 8;
-
+    /// <summary>
+    /// 是否启用动态unit的动态碰撞网格功能
+    /// </summary>
 	public bool enableDynamicGrid;
 
 	private string smkey = string.Empty;
@@ -1146,7 +1152,10 @@ public class GameScene
 		this.units.Remove(gameObjectUnit);                  //从列表移除
 		this.unitCount--;
 	}
-
+    /// <summary>
+    ///   编辑器中根据unit删除指定unit对象
+    /// </summary>
+    /// <param name="unit"></param>
 	public void RemoveUnitInEditor(GameObjectUnit unit)
 	{
 		if (unit == null)
@@ -1166,7 +1175,11 @@ public class GameScene
 		this.units.Remove(unit);
 		this.unitCount--;
 	}
-
+    /// <summary>
+    /// 添加unit到当前unit列表及映射
+    /// </summary>
+    /// <param name="unit"></param>
+    /// <returns></returns>
 	public bool AddUnit(GameObjectUnit unit)
 	{
 		if (this.unitsMap.ContainsKey(unit.createID))
@@ -1178,7 +1191,12 @@ public class GameScene
 		this.unitCount++;
 		return true;
 	}
-
+    /// <summary>
+    /// 移除动态unit
+    /// </summary>
+    /// <param name="unit"></param>
+    /// <param name="cache">是否缓存</param>
+    /// <param name="immediately">是否直接销毁或者延迟销毁</param>
 	public void RemoveDynamicUnit(DynamicUnit unit, bool cache = true, bool immediately = false)
 	{
 		if (unit == null)
@@ -1189,7 +1207,7 @@ public class GameScene
 		{
 			unit.RemoveAllLinkDynamic();
 		}
-		if (!true)
+		if (!true) //不直接销毁的话,加入待移除的unit列表
 		{
 			unit.Stop();
 			unit.willRemoved = true;
@@ -1206,11 +1224,16 @@ public class GameScene
 			unit.createID = -1;
 			if (cache && !this.dynamicUnitsCache.Contains(unit))
 			{
-				this.dynamicUnitsCache.Add(unit);
+				this.dynamicUnitsCache.Add(unit); //需要缓存，加入缓存动态unit列表
 			}
 		}
 	}
-
+    /// <summary>
+    /// 移除静态unit
+    /// </summary>
+    /// <param name="unit"></param>
+    /// <param name="destroy">是否销毁</param>
+    /// <param name="cache">是否缓存</param>
 	public void RemoveUnit(GameObjectUnit unit, bool destroy = false, bool cache = false)
 	{
 		unit.Invisible();
@@ -1223,7 +1246,7 @@ public class GameScene
 		this.unitCount--;
 		if (cache && !this.staticUnitcCache.Contains(unit))
 		{
-			this.staticUnitcCache.Add(unit);
+			this.staticUnitcCache.Add(unit);   //加入静态unit缓存列表
 		}
 	}
     /// <summary>
@@ -1266,7 +1289,11 @@ public class GameScene
 			this.tiles.Remove(tile);
 		}
 	}
-
+    /// <summary>
+    /// 根据索引键获取指定的tile对象
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
 	public Tile FindTile(string key)
 	{
 		if (this.tilesMap.ContainsKey(key))
@@ -2198,7 +2225,9 @@ public class GameScene
 			this.preloadComplate = true;
 		}
 	}
-
+    /// <summary>
+    /// 重置加载状态
+    /// </summary>
 	public void ResetLoad()
 	{
 		this.loadSceneComplate = false;
@@ -2381,10 +2410,10 @@ public class GameScene
 		{
 			this.dx = this.eyePos.x - this.tiles[i].position.x;
 			this.dz = this.eyePos.z - this.tiles[i].position.z;
-			this.tiles[i].viewDistance = Mathf.Sqrt(this.dx * this.dx + this.dz * this.dz);
+			this.tiles[i].viewDistance = Mathf.Sqrt(this.dx * this.dx + this.dz * this.dz);  //更新视距
 			if (this.tiles[i].terrain != null)
 			{
-				if (this.tiles[i].viewDistance > 30f)
+				if (this.tiles[i].viewDistance > 30f)   //tile视距超过一定距离关闭接收阴影,优化性能
 				{
 					this.tiles[i].terrain.WithoutShadow();
 				}
@@ -2393,11 +2422,11 @@ public class GameScene
 					this.tiles[i].terrain.ReceiveShadow();
 				}
 			}
-			if (this.tiles[i].viewDistance > 39f && this.tiles[i].terrain != null)
+			if (this.tiles[i].viewDistance > 39f && this.tiles[i].terrain != null)  //tile视距超过一定值，可以取消光照贴图效果，优化性能
 			{
 				this.tiles[i].terrain.CancelBake();
 			}
-			if (this.tiles[i].viewDistance > this.tiles[i].far + 8f)
+			if (this.tiles[i].viewDistance > this.tiles[i].far + 8f)   //tile视距比剔除距离大一定值，从场景移除tile，但是不销毁
 			{
 				if (!GameScene.dontCullUnit)
 				{
@@ -2409,7 +2438,7 @@ public class GameScene
 			else
 			{
 				this.tiles[i].Update(this.eyePos);
-				if (!this.tiles[i].visible && this.visTileCount < this.visibleTilePerFrame)
+				if (!this.tiles[i].visible && this.visTileCount < this.visibleTilePerFrame)  //如果可视tile数小于每帧可显示tile上限，显示该tile
 				{
 					this.tiles[i].Visible();
 					this.visTileCount++;
@@ -2417,7 +2446,10 @@ public class GameScene
 			}
 		}
 	}
-
+    /// <summary>
+    /// 收集当前静态unit列表的资源路径列表
+    /// </summary>
+    /// <returns></returns>
 	public List<string> CollectStaticUnitAssetPath()
 	{
 		List<string> list = new List<string>();
@@ -2431,7 +2463,10 @@ public class GameScene
 		}
 		return list;
 	}
-
+    /// <summary>
+    /// 收集当前tile列表的地形的splat资源路径
+    /// </summary>
+    /// <returns></returns>
 	public List<string> CollectTerrainSplatsAssetPath()
 	{
 		List<string> list = new List<string>();
@@ -2452,13 +2487,15 @@ public class GameScene
 		}
 		return list;
 	}
-
+    /// <summary>
+    /// 更新当前unit的各种状态
+    /// </summary>
 	public void UpdateUnits()
 	{
 		int num = this.units.Count;
 		this.visibleDynamicUnitCount = 0;
 		this.visibleStaticUnitCount = 0;
-		if (this.tick % 3 == 0)
+		if (this.tick % 3 == 0)    //每3个tick进行一次初始每帧开启Unit可视计数
 		{
 			this.visibleDynaUnitPerFrame = 0;
 		}
@@ -2469,8 +2506,8 @@ public class GameScene
 		this.visibleStaticTypeCount = 0;
 		this.staticTypeMap.Clear();
 		this.dynamicUnits.Clear();
-		GameObjectUnit gameObjectUnit = null;
-		GameObjectUnit gameObjectUnit2 = null;
+		GameObjectUnit gameObjectUnit = null;                //--- 筛选的视距最小的unit
+		GameObjectUnit gameObjectUnit2 = null;               //----筛选的视距最大的unit
 		this.shadowUnits.Clear();
 		for (int i = 0; i < num; i++)
 		{
@@ -2479,29 +2516,32 @@ public class GameScene
 			{
 				gameObjectUnit3.Update();
 			}
-			if (gameObjectUnit3.isStatic && (this.hideStaticUnitPerFrame < 1 || this.visibleStaticUnitPerFrame < 1))
+			if (gameObjectUnit3.isStatic && (this.hideStaticUnitPerFrame < 1 || this.visibleStaticUnitPerFrame < 1)) //静态Unit,并且当前的隐藏静态unit计数没达到上限 或者可视静态unit计数没达到上限
 			{
 				this.dx = gameObjectUnit3.center.x - this.eyePos.x;
 				this.dz = gameObjectUnit3.center.z - this.eyePos.z;
-				gameObjectUnit3.viewDistance = Mathf.Sqrt(this.dx * this.dx + this.dz * this.dz);
-				if (gameObjectUnit3.visible && this.hideStaticUnitPerFrame < 1 && gameObjectUnit3.viewDistance > gameObjectUnit3.far)
+				gameObjectUnit3.viewDistance = Mathf.Sqrt(this.dx * this.dx + this.dz * this.dz);      //计算视距
+                //    this.hideStaticUnitPerFrame < MAX
+                if (gameObjectUnit3.visible && this.hideStaticUnitPerFrame < 1 && gameObjectUnit3.viewDistance > gameObjectUnit3.far)   //unit可视，并且unit视距大于剔除距离
 				{
-					if (!GameScene.dontCullUnit)
+					if (!GameScene.dontCullUnit)    //需要剔除，则移除改unit,不destroy也不缓存
 					{
 						this.RemoveUnit(gameObjectUnit3, false, false);
 						num--;
 						i--;
 						this.hideStaticUnitPerFrame++;
 					}
-					gameObjectUnit3.active = false;
+					gameObjectUnit3.active = false;      //不激活unit
 				}
-				if (!gameObjectUnit3.visible && this.visibleStaticUnitPerFrame < 1 && gameObjectUnit3.viewDistance < gameObjectUnit3.near && (gameObjectUnit3.combineParentUnitID < 0 || GameScene.SampleMode))
+                // this.visibleStaticUnitPerFrame  < MAX
+                if (!gameObjectUnit3.visible && this.visibleStaticUnitPerFrame < 1 && gameObjectUnit3.viewDistance < gameObjectUnit3.near && (gameObjectUnit3.combineParentUnitID < 0 || GameScene.SampleMode))
 				{
-					gameObjectUnit3.active = true;
+                    //不可视，没达到可视上限，视距小于激活距离
+					gameObjectUnit3.active = true;     //激活unit
 					Vector3 lhs = gameObjectUnit3.center - this.mainCamera.transform.position;
 					lhs.Normalize();
 					gameObjectUnit3.viewAngle = Mathf.Acos(Vector3.Dot(lhs, this.viewDir)) / gameObjectUnit3.cullingFactor;
-					if (gameObjectUnit3.viewAngle < this.terrainConfig.cullingAngleFactor)
+					if (gameObjectUnit3.viewAngle < this.terrainConfig.cullingAngleFactor)    //在剔除视域范围内，开启可视
 					{
 						gameObjectUnit3.Visible();
 						this.visibleStaticUnitPerFrame++;
@@ -2513,31 +2553,33 @@ public class GameScene
 					this.visibleStaticUnitCount++;
 				}
 			}
-			if (!gameObjectUnit3.isStatic)
+			if (!gameObjectUnit3.isStatic)          //如果是动态unit
 			{
-				if (gameObjectUnit3.visible)
+				if (gameObjectUnit3.visible)        //可视动态Unit计数
 				{
 					this.visibleDynamicUnitCount++;
 				}
 				this.dx = gameObjectUnit3.position.x - this.eyePos.x;
 				this.dz = gameObjectUnit3.position.z - this.eyePos.z;
-				gameObjectUnit3.viewDistance = Mathf.Sqrt(this.dx * this.dx + this.dz * this.dz);
+				gameObjectUnit3.viewDistance = Mathf.Sqrt(this.dx * this.dx + this.dz * this.dz);     //计算视距
 				if (gameObjectUnit3.position.y > 1E+08f)
 				{
-					gameObjectUnit3.position.y = this.SampleHeight(gameObjectUnit3.position, true);
+					gameObjectUnit3.position.y = this.SampleHeight(gameObjectUnit3.position, true);  //计算高度坐标
 				}
+                //筛选视距最小的unit
 				if (gameObjectUnit == null)
 				{
-					if (!gameObjectUnit3.visible)
+					if (!gameObjectUnit3.visible)    //unit不可视
 					{
 						gameObjectUnit = gameObjectUnit3;
 					}
 				}
-				else if (!gameObjectUnit3.visible && gameObjectUnit3.viewDistance < gameObjectUnit.viewDistance)
+				else if (!gameObjectUnit3.visible && gameObjectUnit3.viewDistance < gameObjectUnit.viewDistance)  //对比记录的unit视距和当前unit，记录视距更小的unit
 				{
 					gameObjectUnit = gameObjectUnit3;
 				}
-				if (gameObjectUnit3.willRemoved && this.removeDynUnits.Count > 0)
+                //筛选视距最大的unit的待移除unit
+				if (gameObjectUnit3.willRemoved && this.removeDynUnits.Count > 0)  //unit如果待移除
 				{
 					if (gameObjectUnit2 == null)
 					{
@@ -2548,12 +2590,14 @@ public class GameScene
 						gameObjectUnit2 = gameObjectUnit3;
 					}
 				}
-				this.dynamicUnits.Add(gameObjectUnit3);
-				if (this.shadowUnits.Count < this.maxCastShadowsUnitCount || gameObjectUnit3.isMainUint)
+				this.dynamicUnits.Add(gameObjectUnit3); //加入动态unit列表
+
+                #region shadow unit 
+                if (this.shadowUnits.Count < this.maxCastShadowsUnitCount || gameObjectUnit3.isMainUint) //如果当前的投影unit数未达到上限或者当前unit为主角unit，加入阴影unit列表中
 				{
 					this.shadowUnits.Add(gameObjectUnit3);
 				}
-				else
+				else      //否则，移除阴影unit列表中视距最大unit，加入当前的unit进入阴影unit列表
 				{
 					float viewDistance = gameObjectUnit3.viewDistance;
 					int num2 = -1;
@@ -2571,26 +2615,28 @@ public class GameScene
 						this.shadowUnits.Add(gameObjectUnit3);
 					}
 				}
-				if (gameObjectUnit3.viewDistance > gameObjectUnit3.far)
+                #endregion
+                if (gameObjectUnit3.viewDistance > gameObjectUnit3.far)   //unit视距大于剔除距离
 				{
-					if (gameObjectUnit3.willRemoved)
+					if (gameObjectUnit3.willRemoved)       //如果待移除，则移除该动态unit，destroy并加入缓存
 					{
 						this.RemoveDynamicUnit(gameObjectUnit3 as DynamicUnit, true, true);
 						num--;
 					}
 					else
 					{
-						gameObjectUnit3.Invisible();
+						gameObjectUnit3.Invisible();       //否则，进行隐藏
 					}
 				}
-				if (this.mapPath != null && gameObjectUnit3.hasCollision)
+				if (this.mapPath != null && gameObjectUnit3.hasCollision)   //如果unit开启了碰撞 ,设置临时的动态碰撞信息，，这里似乎处理的是静止的动态unit的碰撞
 				{
-					this.mapPath.SetDynamicCollision(gameObjectUnit3.position, gameObjectUnit3.collisionSize, true, 1);
+					this.mapPath.SetDynamicCollision(gameObjectUnit3.position, gameObjectUnit3.collisionSize, true, 1); //路径映射中移除状态信息
 					gameObjectUnit3.hasCollision = false;
 				}
-				if (!gameObjectUnit3.willRemoved)
+				if (!gameObjectUnit3.willRemoved)   //如果不是待移除的unit
 				{
-					gameObjectUnit3.Update();
+					gameObjectUnit3.Update();       //进行了update更新，如果还在碰撞范围内
+                    //如果启用unit动态碰撞网格，并且当前unit的视距小于碰撞计算范围，unit有碰撞体，静态阻塞网格为空，路径映射不为空，需要根据当前unit的当前坐标修改路径映射中当前unit相关的碰撞属性
 					if (this.enableDynamicGrid && gameObjectUnit3.viewDistance < this._terrainConfig.collisionComputeRange && this.mapPath != null && gameObjectUnit3.isCollider && gameObjectUnit3.grids == null)
 					{
 						this.mapPath.SetDynamicCollision(gameObjectUnit3.position, gameObjectUnit3.collisionSize, false, 1);
@@ -2599,21 +2645,23 @@ public class GameScene
 				}
 			}
 		}
-		if (gameObjectUnit != null && gameObjectUnit.viewDistance < gameObjectUnit.near && this.visibleDynaUnitPerFrame < 1)
+
+
+		if (gameObjectUnit != null && gameObjectUnit.viewDistance < gameObjectUnit.near && this.visibleDynaUnitPerFrame < 1) //如果当前帧开启可视unit数量未达上限，开启筛选的视距最小的unit可视
 		{
 			gameObjectUnit.Visible();
 			this.visibleDynaUnitPerFrame++;
 		}
-		if (gameObjectUnit2 != null)
+		if (gameObjectUnit2 != null)  //移除视距最大的unit
 		{
 			this.RemoveDynamicUnit(gameObjectUnit2 as DynamicUnit, true, true);
 			this.removeDynUnits.Remove(gameObjectUnit2 as DynamicUnit);
 		}
-		for (int i = 0; i < this.dynamicUnits.Count; i++)
+		for (int i = 0; i < this.dynamicUnits.Count; i++)   //所有动态unit不接受阴影
 		{
 			this.dynamicUnits[i].castShadows = false;
 		}
-		for (int i = 0; i < this.shadowUnits.Count; i++)
+		for (int i = 0; i < this.shadowUnits.Count; i++)    //接受投影的unit列表中的所有unit都接受投影
 		{
 			this.shadowUnits[i].castShadows = true;
 		}
