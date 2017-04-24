@@ -5,28 +5,59 @@ using UnityEngine;
 
 public class MapPath
 {
+    /// <summary>
+    /// 路径搜索完成事件回调
+    /// </summary>
+    /// <param name="paths"></param>
 	public delegate void PathFindEndBack(List<Vector3> paths);
 
 	private const int baseValue = 2048;
-
+    /// <summary>
+    /// grid宽度
+    /// </summary>
 	public int width;
-
+    /// <summary>
+    /// grid高度
+    /// </summary>
 	public int height;
 
+    /// <summary>
+    /// 映射网格的尺寸
+    /// </summary>
 	private float gridSize;
 
+    /// <summary>
+    /// 映射网格的一半尺寸 --宽度
+    /// </summary>
 	public int halfWidth;
 
+    /// <summary>
+    /// 映射网格的一半尺寸 --高度
+    /// </summary>
 	public int halfHeight;
 
+    /// <summary>
+    /// 网格存储的路径状态信息
+    /// </summary>
 	public int[,] grids;
 
+    /// <summary>
+    /// 最大动态碰撞计算尺寸
+    /// </summary>
 	public int maxDynamicCollisizeSize = 2;
 
+    /// <summary>
+    /// 网格类型掩码   --意思是动态最大碰撞尺寸为4 =maxDynamicCollisizeSize*2
+    /// </summary>
 	public int gridTypeMask = 5;
 
+    /// <summary>
+    /// 最大动态碰撞所有位都为1的掩码
+    /// </summary>
 	private int fullMask;
-
+    /// <summary>
+    /// 路径坐标的缓存索引列表
+    /// </summary>
 	private int[,] path;
 
 	private List<HValue> HValueCache = new List<HValue>();
@@ -48,7 +79,9 @@ public class MapPath
 	private int[] heapX = new int[2];
 
 	private int[] heapY = new int[2];
-
+    /// <summary>
+    /// 基础标记值
+    /// </summary>
 	private int markBase = 10;
 
 	private int[] dx = new int[8];
@@ -56,25 +89,44 @@ public class MapPath
 	private int[] dy = new int[8];
 
 	private List<HValue> pathHValues = new List<HValue>();
-
+    /// <summary>
+    /// 路径搜索是否完成
+    /// </summary>
 	public bool pathFindEnd = true;
-
+    /// <summary>
+    /// 搜索路径起点
+    /// </summary>
 	public Vector3 pfStartPoint;
-
+    /// <summary>
+    /// 搜索路径终点
+    /// </summary>
 	public Vector3 pfEndPoint;
-
+    /// <summary>
+    /// 搜索(移动体)碰撞尺寸
+    /// </summary>
 	public int pfCollisionSize;
-
+    /// <summary>
+    /// 一次搜索结果路径信息列表
+    /// </summary>
 	public List<Vector3> paths = new List<Vector3>();
-
+    /// <summary>
+    /// 路径搜索完成事件回调
+    /// </summary>
 	public MapPath.PathFindEndBack pathFindEndBack;
-
+    /// <summary>
+    /// 临时距离信息记录
+    /// </summary>
 	private Dictionary<int, float> distanceRecord = new Dictionary<int, float>();
 
 	private List<Vector2> tryPath = new List<Vector2>();
 
 	private List<int> pointsList = new List<int>();
-
+    /// <summary>
+    /// 初始化各种列表属性等
+    /// </summary>
+    /// <param name="gridSize"></param>
+    /// <param name="width"></param>
+    /// <param name="height"></param>
 	public MapPath(float gridSize, int width = 0, int height = 0)
 	{
 		for (int i = 0; i < this.maxDynamicCollisizeSize; i++)
@@ -94,7 +146,7 @@ public class MapPath
 				this.grids[i, j] = 0;
 			}
 		}
-		if (this.path == null)
+		if (this.path == null)    //初始化
 		{
 			this.path = new int[this.width, this.height];
 			for (int i = 0; i < width; i++)
@@ -110,12 +162,17 @@ public class MapPath
 			this.HValueCache.Add(new HValue());
 		}
 	}
-
+    /// <summary>
+    /// 获取分配给指定网格坐标的缓存索引
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
 	private HValue getHValue(int x, int y)
 	{
 		if (this.path[x, y] == -1)
 		{
-			if (this.cacheIndex == this.cacheCount)
+			if (this.cacheIndex == this.cacheCount) //缓存索引达到最大缓存数量，最大缓存数加1000
 			{
 				for (int i = 0; i < 1000; i++)
 				{
@@ -138,7 +195,10 @@ public class MapPath
 	public void Reset()
 	{
 	}
-
+    /// <summary>
+    /// 从配置文件读取网格状态信息
+    /// </summary>
+    /// <param name="br"></param>
 	public void Read(BinaryReader br)
 	{
 		this.width = br.ReadInt32();
@@ -155,6 +215,11 @@ public class MapPath
 		}
 	}
 
+    /// <summary>
+    /// 获取指定坐标网格中的非阻塞网格坐标列表
+    /// </summary>
+    /// <param name="customGrids"></param>
+    /// <returns></returns>
 	public int[,] CheckCustomGrids(int[,] customGrids)
 	{
 		int length = customGrids.GetLength(0);
@@ -163,7 +228,7 @@ public class MapPath
 		{
 			int num = customGrids[i, 0];
 			int num2 = customGrids[i, 1];
-			if (this.grids[num, num2] != 3)
+			if (this.grids[num, num2] != 3)  //----------------------------------------- 如果不是完全阻塞 
 			{
 				list.Add(num);
 				list.Add(num2);
@@ -182,7 +247,13 @@ public class MapPath
 		}
 		return customGrids;
 	}
-
+    /// <summary>
+    /// 设置指定网格列表中坐标点的动态碰撞阻塞状态
+    /// </summary>
+    /// <param name="worldPostion"></param>
+    /// <param name="customGrids"></param>
+    /// <param name="isRemove"></param>
+    /// <param name="type">类型，问题这里类型好像没有起作用哦哦哦???????????????????????</param>
 	public void SetDynamicCollision(Vector3 worldPostion, int[,] customGrids, bool isRemove = false, int type = 0)
 	{
 		int length = customGrids.GetLength(0);
@@ -192,7 +263,7 @@ public class MapPath
 			int num2 = customGrids[i, 1];
 			if (!isRemove)
 			{
-				if (this.grids[num, num2] != 1 && this.grids[num, num2] != 2)
+				if (this.grids[num, num2] != 1 && this.grids[num, num2] != 2)    // grids[num,num3]==3  ,阻塞状态 ,重新计算设置该位置的网格碰撞状态
 				{
 					this.grids[num, num2] = 1;
 					for (int j = 1; j < this.maxDynamicCollisizeSize; j++)
@@ -201,13 +272,19 @@ public class MapPath
 					}
 				}
 			}
-			else if ((this.grids[num, num2] & 1) > 0)
+			else if ((this.grids[num, num2] & 1) > 0)       //如果状态阻塞相关，重置网格为默认状态，也就是移除阻塞
 			{
 				this.grids[num, num2] = 0;
 			}
 		}
 	}
-
+    /// <summary>
+    /// 重新设置指定位置一定范围内网格坐标处的网格动态碰撞状态
+    /// </summary>
+    /// <param name="worldPostion"></param>
+    /// <param name="size"></param>
+    /// <param name="isRemove"></param>
+    /// <param name="type"></param>
 	public void SetDynamicCollision(Vector3 worldPostion, int size = 1, bool isRemove = false, int type = 1)
 	{
 		int num = Mathf.FloorToInt(worldPostion.x / this.gridSize) + this.halfWidth;
@@ -235,7 +312,12 @@ public class MapPath
 			}
 		}
 	}
-
+    /// <summary>
+    /// 测试指定坐标处的通过阻塞类型
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="type"></param>
 	public void PretestWalkBlocker(int x, int y, int type = 0)
 	{
 		bool flag = (this.grids[x, y] & 1) > 0;
@@ -318,25 +400,32 @@ public class MapPath
 			{
 				break;
 			}
-			if ((this.grids[x, y] & 1 << i) != 0)
+			if ((this.grids[x, y] & 1 << i) != 0) //检测为通过，但是存储的不同，需修改指定位为0
 			{
 				this.grids[x, y] -= 1 << i;
 			}
 		}
 		if (flag)
 		{
-			for (int n = i; n < this.maxDynamicCollisizeSize; n++)
+            // xxxxxxxxxxx|XXXXXXXXXXXXX   前面存储类型信息 | 存储阻塞信息 (最大位数  maxDynamicCollisizeSize)
+            for (int n = i; n < this.maxDynamicCollisizeSize; n++)
 			{
-				this.grids[x, y] |= 1 << n;
+				this.grids[x, y] |= 1 << n;      //阻塞位置1
 			}
 			this.grids[x, y] |= type << this.gridTypeMask;
 		}
-		else if ((this.grids[x, y] & this.fullMask) == 0)
+		else if ((this.grids[x, y] & this.fullMask) == 0) //完全没有阻塞
 		{
 			this.grids[x, y] = 0;
 		}
 	}
-
+    /// <summary>
+    /// 检测指定网格坐标的指定碰撞范围是否可通行
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="collisionSize"></param>
+    /// <returns></returns>
 	public bool IsValidForWalk(int x, int y, int collisionSize)
 	{
 		bool result;
@@ -373,17 +462,29 @@ public class MapPath
 		}
 		return result;
 	}
-
+    /// <summary>
+    /// 检测指定空间坐标的指定碰撞范围是否可通行
+    /// </summary>
+    /// <param name="postion"></param>
+    /// <param name="collisionSize"></param>
+    /// <returns></returns>
 	public bool IsValidForWalk(Vector3 postion, int collisionSize)
 	{
 		int num = Mathf.FloorToInt(postion.x / this.gridSize);
 		int num2 = Mathf.FloorToInt(postion.z / this.gridSize);
 		int num3 = num + this.halfWidth;
 		int num4 = num2 + this.halfHeight;
+        //转换完坐标
 		int num5 = this.grids[num3, num4] & 1 << collisionSize;
 		return num5 < 1;
 	}
-
+    /// <summary>
+    /// 检测世界网格坐标的指定范围是否可通行
+    /// </summary>
+    /// <param name="worldGridX"></param>
+    /// <param name="worldGridZ"></param>
+    /// <param name="collisionSize"></param>
+    /// <returns></returns>
 	public bool IsValidForWalk(float worldGridX, float worldGridZ, int collisionSize)
 	{
 		int num = Mathf.FloorToInt(worldGridX);
@@ -401,7 +502,9 @@ public class MapPath
 		int num5 = this.grids[num3, num4] & 1 << collisionSize;
 		return num5 < 1;
 	}
-
+    /// <summary>
+    /// 预备路径搜索信息
+    /// </summary>
 	public void PrepareForPathSearch()
 	{
 		for (int i = 0; i < this.width; i++)
@@ -418,7 +521,11 @@ public class MapPath
 		this.pathFindEnd = true;
 		this.pathFindEndBack = null;
 	}
-
+    /// <summary>
+    /// 判断符号， 1，0 ，-1
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
 	private int Sign(double value)
 	{
 		if (Math.Abs(value) < 0.0010000000474974513)
@@ -435,25 +542,52 @@ public class MapPath
 		}
 		return 0;
 	}
-
+    /// <summary>
+    /// 计算坐标距离
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="tx"></param>
+    /// <param name="ty"></param>
+    /// <returns></returns>
 	private float Distance(int x, int y, int tx, int ty)
 	{
 		return (float)Math.Sqrt((double)((x - tx) * (x - tx) + (y - ty) * (y - ty)));
 	}
-
+    /// <summary>                                          ________
+    /// 计算寻路评估值??????????????????????????           |    X X |
+    /// </summary>                                        |  X     |
+    /// <param name="nx"></param>                         |X       |
+    /// <param name="ny"></param>
+    /// <param name="gx"></param>
+    /// <param name="gy"></param>
+    /// <returns></returns>
 	private float HeapHFunction(int nx, int ny, int gx, int gy)
 	{
 		float num = (float)Math.Min(Math.Abs(nx - gx), Math.Abs(ny - gy));
 		float num2 = (float)(Math.Abs(nx - gx) + Math.Abs(ny - gy));
 		return 1.414f * num + 1f * (num2 - 2f * num);
 	}
-
+    /// <summary>
+    /// 请求搜索指定条件的路径
+    /// </summary>
+    /// <param name="startPoint">起点</param>
+    /// <param name="endPoint">终点</param>
+    /// <param name="collisionSize">（移动体)碰撞尺寸</param>
+    /// <param name="paths">获取的路径列表</param>
 	public void RequestPaths(Vector3 startPoint, Vector3 endPoint, int collisionSize, out List<Vector3> paths)
 	{
 		this.RequestPaths(startPoint, endPoint, collisionSize, null, 2000000);
 		paths = this.paths;
 	}
-
+    /// <summary>
+    /// 请求获取指定条件的路径
+    /// </summary>
+    /// <param name="startPoint">起点</param>
+    /// <param name="endPoint">终点</param>
+    /// <param name="collisionSize">(移动体)碰撞尺寸</param>
+    /// <param name="pathFindEndBack">路径搜索结束事件回调</param>
+    /// <param name="maxComputeCount">最大的搜索计算次数计数上限</param>
 	public void RequestPaths(Vector3 startPoint, Vector3 endPoint, int collisionSize, MapPath.PathFindEndBack pathFindEndBack = null, int maxComputeCount = 8000)
 	{
 		try
@@ -468,11 +602,13 @@ public class MapPath
 			this.computeTick = 0;
 			this.heapX = new int[2];
 			this.heapY = new int[2];
+            //起点网格坐标
 			this.heapX[0] = Mathf.FloorToInt(startPoint.x / this.gridSize) + this.halfWidth;
 			this.heapY[0] = Mathf.FloorToInt(startPoint.z / this.gridSize) + this.halfHeight;
+            //终点网格坐标
 			this.heapX[1] = Mathf.FloorToInt(endPoint.x / this.gridSize) + this.halfWidth;
 			this.heapY[1] = Mathf.FloorToInt(endPoint.z / this.gridSize) + this.halfHeight;
-			if (this.heapX[0] == this.heapX[1] && this.heapY[0] == this.heapY[1])
+			if (this.heapX[0] == this.heapX[1] && this.heapY[0] == this.heapY[1])   //原地，直接完成
 			{
 				this.paths.Add(endPoint);
 				this.pathFindEnd = true;
@@ -483,6 +619,7 @@ public class MapPath
 			}
 			else
 			{
+                //初始化heap列表
 				for (int i = 0; i < 2; i++)
 				{
 					if (this.heap[i] == null)
@@ -491,10 +628,12 @@ public class MapPath
 					}
 					this.heap[i].Clear();
 				}
+                //重置HValeCache
 				for (int i = 0; i < this.HValueCache.Count; i++)
 				{
 					this.HValueCache[i].Reset();
 				}
+                //path列表重置
 				for (int i = 0; i < this.width; i++)
 				{
 					for (int j = 0; j < this.height; j++)
@@ -507,7 +646,7 @@ public class MapPath
 				{
 					int num = this.heapX[k];
 					int num2 = this.heapY[k];
-					for (int i = -1; i <= 1; i++)
+					for (int i = -1; i <= 1; i++)    //将起点和终点的9宫格信息加入heap表
 					{
 						for (int j = -1; j <= 1; j++)
 						{
@@ -546,7 +685,7 @@ public class MapPath
 				this.RequestPathsImmed(this.pfStartPoint, this.pfEndPoint, this.pfCollisionSize, maxComputeCount);
 			}
 		}
-		catch (Exception ex)
+		catch (Exception ex)  //路径搜索失败
 		{
 			this.paths = new List<Vector3>();
 			if (GameScene.isEditor)
@@ -724,7 +863,14 @@ public class MapPath
 			}
 		}
 	}
-
+    /// <summary>
+    /// 构建路径数组信息
+    /// </summary>
+    /// <param name="paths"></param>
+    /// <param name="start"></param>
+    /// <param name="end"></param>
+    /// <param name="collisionSize"></param>
+    /// <returns></returns>
 	private List<Vector3> BuildPath(List<HValue> paths, Vector3 start, Vector3 end, int collisionSize)
 	{
 		List<Vector3> list = new List<Vector3>();
@@ -794,14 +940,23 @@ public class MapPath
 		paths = list2;
 		return list;
 	}
-
+    /// <summary>
+    /// 什么算法，我很懵逼啊？？？？？？？？？？？？？
+    /// </summary>
+    /// <param name="p"></param>
+    /// <param name="c"></param>
+    /// <returns></returns>
 	private int GetDirection(HValue p, HValue c)
 	{
 		int num = (int)(c.X - p.X);
 		int num2 = (int)(c.Y - p.Y);
 		return (num + 1) * 3 + num2;
 	}
-
+    /// <summary>
+    /// (float)Mathf.FloorToInt(x-1)   ?????/
+    /// </summary>
+    /// <param name="x"></param>
+    /// <returns></returns>
 	private float Left(float x)
 	{
 		float num = Mathf.Floor(x);
@@ -811,26 +966,45 @@ public class MapPath
 		}
 		return num;
 	}
-
+    /// <summary>
+    /// 同上类似
+    /// </summary>
+    /// <param name="x"></param>
+    /// <returns></returns>
 	private float Right(float x)
 	{
 		return (float)Mathf.FloorToInt(x + 1f);
 	}
-
+    /// <summary>
+    /// 获取记录关联指定位置坐标用索引
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <returns></returns>
 	private int GetKey(Vector3 pos)
 	{
 		int num = Mathf.FloorToInt(pos.x);
 		int num2 = Mathf.FloorToInt(pos.z);
 		return num * 2048 + num2;
 	}
-
+    /// <summary>
+    /// 从记录索引中获取位置坐标
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
 	private Vector2 ToValue(int key)
 	{
 		return new Vector2((float)(key / 2048), (float)(key % 2048));
 	}
-
+    /// <summary>
+    /// 这个啥子算法，完全没概念啊??????????????????????????????????????????????
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="target"></param>
+    /// <param name="collisionSize"></param>
+    /// <returns></returns>
 	public float TryWalkDistance(Vector3 start, Vector3 target, int collisionSize)
 	{
+        //空间坐标转换网格坐标
 		start.y = (target.y = 0f);
 		start /= this.gridSize;
 		start.x += (float)this.halfWidth;
@@ -838,7 +1012,7 @@ public class MapPath
 		target /= this.gridSize;
 		target.x += (float)this.halfWidth;
 		target.z += (float)this.halfHeight;
-		if (!this.IsValidForWalk((int)start.x, (int)start.z, 0))
+		if (!this.IsValidForWalk((int)start.x, (int)start.z, 0))   //检测起点可通行性
 		{
 			return 0f;
 		}

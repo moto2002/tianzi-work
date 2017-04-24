@@ -34,10 +34,15 @@ public class HValue
 		this.PreX = -1;
 		this.PreY = -1;
 	}
-
+    /// <summary>
+    /// 比较评估
+    /// </summary>
+    /// <param name="left"></param>
+    /// <param name="right"></param>
+    /// <returns></returns>
 	public static bool Compare(HValue left, HValue right)
 	{
-		if (Math.Abs(right.Key - left.Key) < 0.1f)
+		if (Math.Abs(right.Key - left.Key) < 0.1f)  //key值相等   ,比较cost
 		{
 			return Math.Abs(right.Cost - left.Cost) >= 0.1f && left.Cost > right.Cost;
 		}

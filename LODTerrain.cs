@@ -37,9 +37,13 @@ public class LODTerrain : MonoBehaviour
 	public int[] triangles;
 
 	public Material matrial;
-
+    /// <summary>
+    /// 地形网格渲染器
+    /// </summary>
 	public MeshRenderer terrainRenderer;
-
+    /// <summary>
+    /// 地形配置数据
+    /// </summary>
 	public TerrainConfig terrainConfig;
 
 	private int tick;
@@ -75,7 +79,9 @@ public class LODTerrain : MonoBehaviour
 	private float[] _faceWeights;
 
 	private float[] _faceTangents;
-
+    /// <summary>
+    /// 初始地形
+    /// </summary>
 	public void Init()
 	{
 		this.BuildGeometry();
@@ -85,7 +91,9 @@ public class LODTerrain : MonoBehaviour
 		this.BuildTangents();
 		this.BuildMaterial(null);
 	}
-
+    /// <summary>
+    /// 分tick进行地形构建，优化性能
+    /// </summary>
 	private void Update()
 	{
 		this.tick++;
@@ -106,7 +114,12 @@ public class LODTerrain : MonoBehaviour
 			this.terrainRenderer.enabled = true;
 		}
 	}
-
+    /// <summary>
+    /// 使用地形数据信息创建地形游戏对象
+    /// </summary>
+    /// <param name="terrainData">属性数据</param>
+    /// <param name="useTrrainData"></param>
+    /// <returns></returns>
 	public static LODTerrain CreateTerrainGameObject(LODTerrainData terrainData, bool useTrrainData = false)
 	{
 		GameObject gameObject = new GameObject();
@@ -183,7 +196,9 @@ public class LODTerrain : MonoBehaviour
 		int yBase = (int)base.transform.position.z - 16 + this.terrainConfig.sceneHeight / 2;
 		target.SetHeights(xBase, yBase, this.terrainData.heightmap);
 	}
-
+    /// <summary>
+    /// 根据当前场景的地图信息，计算生成地形网格顶点列表
+    /// </summary>
 	public void BuildGeometry()
 	{
 		if (this.mesh == null)
@@ -208,7 +223,7 @@ public class LODTerrain : MonoBehaviour
 			}
 		}
 		this.mesh.vertices = this.vertices;
-		if (Application.isEditor && base.gameObject != null)
+		if (Application.isEditor && base.gameObject != null) //如果是编辑器环境，销毁重建网格碰撞器
 		{
 			MeshCollider component = base.gameObject.GetComponent<MeshCollider>();
 			if (component != null)
@@ -219,6 +234,9 @@ public class LODTerrain : MonoBehaviour
 		}
 	}
 
+    /// <summary>
+    /// 创建16x16默认高度网格顶点坐标数组
+    /// </summary>
 	private static void BuildShareVertices()
 	{
 		int num = 16;
@@ -238,7 +256,9 @@ public class LODTerrain : MonoBehaviour
 			}
 		}
 	}
-
+    /// <summary>
+    /// 创建网格三角形索引数组数据
+    /// </summary>
 	public void BuildTriangles()
 	{
 		if (LODTerrain.shareTriangles == null)
@@ -248,7 +268,9 @@ public class LODTerrain : MonoBehaviour
 		this.triangles = LODTerrain.shareTriangles;
 		this.mesh.triangles = this.triangles;
 	}
-
+    /// <summary>
+    /// 创建16x16网格的网格三角形顶点索引数组
+    /// </summary>
 	private static void BuildShareTriangles()
 	{
 		int num = 16;
@@ -274,7 +296,9 @@ public class LODTerrain : MonoBehaviour
 		}
 		LODTerrain.shareTriangles = array;
 	}
-
+    /// <summary>
+    /// 创建网格UV坐标数据数据
+    /// </summary>
 	public void BuildUVs()
 	{
 		if (LODTerrain.shareUVS == null)
@@ -284,7 +308,9 @@ public class LODTerrain : MonoBehaviour
 		this.mesh.uv = LODTerrain.shareUVS;
 		this.uvs = LODTerrain.shareUVS;
 	}
-
+    /// <summary>
+    /// 创建16x16网格uv坐标数组
+    /// </summary>
 	private static void BuildShareUVS()
 	{
 		int num = 16;
@@ -301,10 +327,13 @@ public class LODTerrain : MonoBehaviour
 		}
 		LODTerrain.shareUVS = array;
 	}
-
+    /// <summary>
+    /// 根据水体数据创建水体相关使用材质,这里似乎只有光照贴图材质??? 跟水体要毛关系啊??????
+    /// </summary>
+    /// <param name="waterData"></param>
 	public void BuildMaterial(WaterData waterData = null)
 	{
-		if (LightmapSettings.lightmaps.Length > 0 || GameScene.isPlaying)
+		if (LightmapSettings.lightmaps.Length > 0 || GameScene.isPlaying)  //有光照贴图
 		{
 			if (!this.terrainConfig.enablePointLight)
 			{
@@ -315,7 +344,7 @@ public class LODTerrain : MonoBehaviour
 				this.matrial = new Material(this.terrainMobileWithPointLightShader);
 			}
 		}
-		else
+		else                                                              //否则启用实时光照???
 		{
 			this.matrial = new Material(this.realLightShader);
 		}
@@ -329,7 +358,7 @@ public class LODTerrain : MonoBehaviour
 			texture = this.terrainData.splatsmapTex;
 		}
 		this.matrial.SetTexture("_Control", texture);
-		for (int i = 0; i < this.terrainData.spaltsmapLayers; i++)
+		for (int i = 0; i < this.terrainData.spaltsmapLayers; i++)   //如果有splatmap，则添加
 		{
 			Splat splat = this.terrainData.splats[i];
 			if (splat != null)
@@ -346,9 +375,11 @@ public class LODTerrain : MonoBehaviour
 				this.matrial.SetTextureOffset("_Splat" + i, Vector2.zero);
 			}
 		}
-		base.renderer.material = this.matrial;
-	}
-
+		base.renderer.material = this.matrial;                       //给渲染器赋予材质
+	}                                                                
+    /// <summary>
+    /// 关闭地形接收阴影
+    /// </summary>
 	public void WithoutShadow()
 	{
 		this.terrainRenderer.receiveShadows = false;
@@ -357,7 +388,9 @@ public class LODTerrain : MonoBehaviour
 			this.bakeMat.shader = this.bakeNoShadowShader;
 		}
 	}
-
+    /// <summary>
+    /// 开启地形接受阴影
+    /// </summary>
 	public void ReceiveShadow()
 	{
 		this.terrainRenderer.receiveShadows = true;
@@ -366,7 +399,9 @@ public class LODTerrain : MonoBehaviour
 			this.bakeMat.shader = this.bakeShader;
 		}
 	}
-
+    /// <summary>
+    /// 烘焙得到的环境渲染RenderTexture作为地形贴图的主纹理
+    /// </summary>
 	public void Bake()
 	{
 		this.terrainMapIndex = Terrainmapping.Bake(this, 1024);
@@ -377,7 +412,9 @@ public class LODTerrain : MonoBehaviour
 			base.renderer.material = this.bakeMat;
 		}
 	}
-
+    /// <summary>
+    /// 取消烘焙材质，使用原始材质渲染
+    /// </summary>
 	public void CancelBake()
 	{
 		if (this.terrainMapIndex >= 0)
@@ -388,13 +425,20 @@ public class LODTerrain : MonoBehaviour
 		}
 	}
 
+    /// <summary>
+    /// 构建全体网格法线
+    /// </summary>
 	public void BuildNormals()
 	{
 		this.UpdateFaceNormals();
 		this.UpdateVertexNormals(-1f);
 		this.mesh.normals = this.normals;
 	}
-
+    /// <summary>
+    /// 依据指定中心及范围网格顶点，构建网格法线
+    /// </summary>
+    /// <param name="center"></param>
+    /// <param name="range"></param>
 	public void BuildNormals(Vector3 center, float range)
 	{
 		this.nCenter = center;
@@ -402,25 +446,39 @@ public class LODTerrain : MonoBehaviour
 		this.UpdateVertexNormals(range);
 		this.mesh.normals = this.normals;
 	}
-
+    /// <summary>
+    /// 构建网格切线
+    /// </summary>
 	public void BuildTangents()
 	{
 		this.UpdateFaceTangents();
 		this.UpdateVertexTangents();
 		this.mesh.tangents = this.tangents;
 	}
-
+    /// <summary>
+    /// 清空边界法线列表
+    /// </summary>
 	public static void ClearSideNormals()
 	{
 		LODTerrain.sideNormals.Clear();
 	}
-
+    /// <summary>
+    /// 是否包含指定的边界坐标法线
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="z"></param>
+    /// <returns></returns>
 	public bool HasSideNormal(float x, float z)
 	{
 		string key = x + "_" + z;
 		return LODTerrain.sideNormals.ContainsKey(key);
 	}
-
+    /// <summary>
+    /// 添加指定顶点的边界法线
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="z"></param>
+    /// <param name="normal"></param>
 	public void AddSideNormal(float x, float z, Vector3 normal)
 	{
 		string key = x + "_" + z;
@@ -430,7 +488,12 @@ public class LODTerrain : MonoBehaviour
 		}
 		LODTerrain.sideNormals[key] = normal;
 	}
-
+    /// <summary>
+    /// 获取指定坐标顶点的边界法线
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="z"></param>
+    /// <returns></returns>
 	public Vector3 GetSideNormal(float x, float z)
 	{
 		string key = x + "_" + z;
@@ -440,7 +503,9 @@ public class LODTerrain : MonoBehaviour
 		}
 		return Vector3.zero;
 	}
-
+    /// <summary>
+    /// 更新面法线及三角形面权重列表
+    /// </summary>
 	private void UpdateFaceNormals()
 	{
 		int i = 0;
@@ -485,7 +550,12 @@ public class LODTerrain : MonoBehaviour
 			this._faceNormals[num++] = num13 * num14;
 		}
 	}
-
+    /// <summary>
+    /// 判断指定索引的顶点是否在地形中心点一定距离范围内
+    /// </summary>
+    /// <param name="ind"></param>
+    /// <param name="range"></param>
+    /// <returns></returns>
 	private bool InRange(int ind, float range)
 	{
 		Vector3 v = this.vertices[ind];
@@ -502,7 +572,10 @@ public class LODTerrain : MonoBehaviour
 		}
 		return true;
 	}
-
+    /// <summary>
+    /// 更新顶点法线列表
+    /// </summary>
+    /// <param name="range"></param>
 	protected void UpdateVertexNormals(float range = -1f)
 	{
 		int i = 0;
@@ -522,7 +595,7 @@ public class LODTerrain : MonoBehaviour
 		int j = 0;
 		int num5 = 0;
 		int num6 = this.triangles.Length;
-		while (j < num6)
+		while (j < num6)    //循环遍历三角形列表，根据面法线及面权重计算顶点法线
 		{
 			float num7 = this._faceWeights[num5++];
 			int num8 = this.triangles[j++];
@@ -571,7 +644,7 @@ public class LODTerrain : MonoBehaviour
 		for (i = 0; i < num4; i++)
 		{
 			Vector3 v = this.vertices[i];
-			if (Mathf.Abs(v.x) > 15f || Mathf.Abs(v.z) > 15f)
+			if (Mathf.Abs(v.x) > 15f || Mathf.Abs(v.z) > 15f)      //边界处
 			{
 				v = base.transform.localToWorldMatrix.MultiplyPoint3x4(v);
 				if (range > 0f)
@@ -579,24 +652,25 @@ public class LODTerrain : MonoBehaviour
 					float num9 = v.x - this.nCenter.x;
 					float num10 = v.z - this.nCenter.z;
 					float num11 = Mathf.Sqrt(num9 * num9 + num10 * num10);
-					if (num11 > range)
+					if (num11 > range)        //到中心距离大于一定范围，不计算顶点法线
 					{
 						i++;
 						continue;
 					}
 				}
-				if (!this.HasSideNormal(v.x, v.z))
+				if (!this.HasSideNormal(v.x, v.z)) //如果不存在边界法线中    ,计算法线，并加入边界法线列表中
 				{
 					float x = this.normals[i].x;
 					float y = this.normals[i].y;
 					float z = this.normals[i].z;
-					float num12 = 1f / Mathf.Sqrt(x * x + y * y + z * z);
+                    //法线进行归一化处理
+                    float num12 = 1f / Mathf.Sqrt(x * x + y * y + z * z);
 					this.normals[i].x = x * num12;
 					this.normals[i].y = y * num12;
 					this.normals[i].z = z * num12;
 					this.AddSideNormal(v.x, v.z, this.normals[i]);
 				}
-				else
+				else                                                         //如果已经有，直接获取边界法线
 				{
 					this.normals[i].x = this.GetSideNormal(v.x, v.z).x;
 					this.normals[i].y = this.GetSideNormal(v.x, v.z).y;
@@ -606,7 +680,7 @@ public class LODTerrain : MonoBehaviour
 			else
 			{
 				v = base.transform.localToWorldMatrix.MultiplyPoint3x4(v);
-				if (range > 0f)
+				if (range > 0f)   //过滤掉边界法线，因为边界法线的计算方法跟不同步一样
 				{
 					float num13 = v.x - this.nCenter.x;
 					float num14 = v.z - this.nCenter.z;
@@ -617,6 +691,7 @@ public class LODTerrain : MonoBehaviour
 						continue;
 					}
 				}
+                //法线进行归一化处理
 				float x2 = this.normals[i].x;
 				float y2 = this.normals[i].y;
 				float z2 = this.normals[i].z;
@@ -627,7 +702,9 @@ public class LODTerrain : MonoBehaviour
 			}
 		}
 	}
-
+    /// <summary>
+    /// 计算三角形列表的切线列表
+    /// </summary>
 	protected void UpdateFaceTangents()
 	{
 		int i = 0;
@@ -659,7 +736,9 @@ public class LODTerrain : MonoBehaviour
 			this._faceTangents[i++] = num16 * num15;
 		}
 	}
-
+    /// <summary>
+    /// 计算顶点列表的切线列表
+    /// </summary>
 	protected void UpdateVertexTangents()
 	{
 		int i = 0;

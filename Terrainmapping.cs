@@ -11,11 +11,15 @@ public class Terrainmapping
 	private static GameObject quad;
 
 	private static Material sntMat;
-
+    /// <summary>
+    /// RenderTexture列表，数量限定
+    /// </summary>
 	public static List<RenderTexture> maps = new List<RenderTexture>();
 
 	private static List<int> mapIndex = new List<int>();
-
+    /// <summary>
+    /// 地形mapping数量，创建指定数量的RenderTextuer
+    /// </summary>
 	public static int mapsCount
 	{
 		set
@@ -36,7 +40,10 @@ public class Terrainmapping
 			}
 		}
 	}
-
+    /// <summary>
+    /// 取消指定的renderTexture映射索引
+    /// </summary>
+    /// <param name="index"></param>
 	public static void Cancel(int index)
 	{
 		if (index >= 0)
@@ -44,7 +51,12 @@ public class Terrainmapping
 			Terrainmapping.mapIndex[index] = -1;
 		}
 	}
-
+    /// <summary>
+    /// 烘焙环境信息到指定RenderTextrue
+    /// </summary>
+    /// <param name="terrain"></param>
+    /// <param name="size"></param>
+    /// <returns></returns>
 	public static int Bake(LODTerrain terrain, int size = 512)
 	{
 		RenderTexture renderTexture = null;
@@ -79,7 +91,9 @@ public class Terrainmapping
 		}
 		return num;
 	}
-
+    /// <summary>
+    /// 更新采样摄像机采样模式
+    /// </summary>
 	private static void UpdateCameraModes()
 	{
 		Terrainmapping.rttCamera.backgroundColor = new Color(1f, 1f, 1f);
@@ -89,7 +103,9 @@ public class Terrainmapping
 		Terrainmapping.rttCamera.aspect = 1f;
 		Terrainmapping.rttCamera.orthographicSize = 1f;
 	}
-
+    /// <summary>
+    /// 创建摄像机对象及quad对象
+    /// </summary>
 	private static void CreateObjects()
 	{
 		if (Terrainmapping.rttCamera == null)
@@ -100,8 +116,8 @@ public class Terrainmapping
 			});
 			Terrainmapping.rttCamera = gameObject.camera;
 			Terrainmapping.rttCamera.enabled = false;
-			Terrainmapping.rttCamera.cullingMask = GameLayer.Mask_AmbienceSphere;
-			Terrainmapping.rttCamera.clearFlags = CameraClearFlags.Color;
+			Terrainmapping.rttCamera.cullingMask = GameLayer.Mask_AmbienceSphere;  //渲染环境层
+			Terrainmapping.rttCamera.clearFlags = CameraClearFlags.Color;          //清除颜色缓存
 			gameObject.transform.position = new Vector3(0f, 0f, 100f);
 		}
 		if (Terrainmapping.quad == null)

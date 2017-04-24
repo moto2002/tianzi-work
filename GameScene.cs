@@ -88,17 +88,25 @@ public class GameScene
     /// 当前的静态unit列表
     /// </summary>
 	public List<GameObjectUnit> units;
-
+    /// <summary>
+    /// 当前场景unit数量
+    /// </summary>
 	public int unitCount;
-
+    /// <summary>
+    /// 当前场景创建的unitID数量计数,一直增加，避免重复
+    /// </summary>
 	public int unitIdCount;
-
+    /// <summary>
+    /// 地形配置信息引用
+    /// </summary>
 	private TerrainConfig _terrainConfig;
     /// <summary>
     /// 当前场景包含的tile映射
     /// </summary>
 	private Dictionary<string, Tile> tilesMap;
-
+    /// <summary>
+    /// 当前场景中的unit列表
+    /// </summary>
 	public List<Tile> tiles;
     /// <summary>
     /// 当前视点所在tile
@@ -108,25 +116,39 @@ public class GameScene
     /// 不剔除unit
     /// </summary>
 	public static bool dontCullUnit = true;
-
+    /// <summary>
+    /// 是否编辑器中
+    /// </summary>
 	public static bool isEditor = false;
 
 	private static MapPath _mapPath;
 
 	private MapPath _saveMapPath;
-
+    /// <summary>
+    /// 细节网格尺寸
+    /// </summary>
 	private float detailGridSize = 0.5f;
-
+    /// <summary>
+    /// 场景中的摄像机列表
+    /// </summary>
 	private List<Camera> cameras = new List<Camera>();
-
+    /// <summary>
+    /// 主角的主unit
+    /// </summary>
 	public GameObjectUnit mainUnit;
-
+    /// <summary>
+    /// 主摄像机
+    /// </summary>
 	public Camera mainCamera;
-
+    /// <summary>
+    /// 主摄像机cullingmask
+    /// </summary>
 	private static int mainCameraCullingMask = -1;
 
 	private static float[,] _heights;
-
+    /// <summary>
+    /// 当前主场景引用
+    /// </summary>
 	public static GameScene mainScene = null;
     /// <summary>
     /// GameScene栈列表
@@ -180,26 +202,34 @@ public class GameScene
     /// 当前场景unit单位映射表，包含所有加载的unit   ??????
     /// </summary>
 	public Dictionary<int, GameObjectUnit> curSceneUnitsMap = new Dictionary<int, GameObjectUnit>();
-
+    /// <summary>
+    /// 当前场景的配置解析器列表
+    /// </summary>
 	public List<ParserBase> parsers = new List<ParserBase>();
     /// <summary>
     /// 后期处理效果列表
     /// </summary>
 	public List<string> postEffectsList = new List<string>();
-
+    /// <summary>
+    /// 后期处理效果配置信息数据列表
+    /// </summary>
 	private Dictionary<string, byte[]> peConfig = new Dictionary<string, byte[]>();
 
     /// <summary>
     /// 是否启用光照贴图修正
     /// </summary>
 	public static bool lightmapCorrectOn = false;
-
+    /// <summary>
+    /// 当前场景Root引用
+    /// </summary>
 	private static Root _rootIns;
     /// <summary>
     /// 光照数据长度，读取数据时使用一下？？？？
     /// </summary>
 	public long lightDataLength = -1L;
-
+    /// <summary>
+    /// 指定当前GameScene对象待destroy
+    /// </summary>
 	private bool destroyed;
     /// <summary>
     /// 截屏纹理贴图
@@ -369,7 +399,9 @@ public class GameScene
 	private float dx;
 
 	private float dz;
-
+    /// <summary>
+    /// 启用接受阴影的动态unit列表
+    /// </summary>
 	private List<GameObjectUnit> shadowUnits = new List<GameObjectUnit>();
     /// <summary>
     /// 当前可以接受阴影的unit最大数量
@@ -379,11 +411,17 @@ public class GameScene
     /// 是否启用动态unit的动态碰撞网格功能
     /// </summary>
 	public bool enableDynamicGrid;
-
+    /// <summary>
+    /// 当前Region的引用键key
+    /// </summary>
 	private string smkey = string.Empty;
-
+    /// <summary>
+    /// 主角所在tile的地形水体高度
+    /// </summary>
 	public float waterHeight;
-
+    /// <summary>
+    /// 场景的根游戏对象Root引用
+    /// </summary>
 	public static Root root
 	{
 		get
@@ -396,7 +434,9 @@ public class GameScene
 			return GameScene._rootIns;
 		}
 	}
-
+    /// <summary>
+    /// 地形配置信息
+    /// </summary>
 	public TerrainConfig terrainConfig
 	{
 		get
@@ -765,15 +805,22 @@ public class GameScene
 		camera.backgroundColor = this._terrainConfig.fogColor;
 		this.cameras.Add(camera);
 	}
-
+    /// <summary>
+    /// 判断目标点，以一定的碰撞尺寸范围碰撞，是否可以移动
+    /// </summary>
+    /// <param name="worldPostion"></param>
+    /// <param name="collisionSize"></param>
+    /// <returns></returns>
 	public bool IsValidForWalk(Vector3 worldPostion, int collisionSize)
 	{
 		if (GameScene._mapPath == null)
 		{
 			return false;
 		}
+        //这里表示坐标原点在场景中心点么？？？？？？？？？？？？？？？？？
 		int num = Mathf.FloorToInt(worldPostion.x / this.detailGridSize);
 		int num2 = Mathf.FloorToInt(worldPostion.z / this.detailGridSize);
+        //判断是否超出路径映射边界
 		if (Math.Abs(num) >= GameScene._mapPath.halfWidth)
 		{
 			return false;
@@ -782,8 +829,10 @@ public class GameScene
 		{
 			return false;
 		}
+        //计算实际网格坐标
 		int num3 = num + this.mapPath.halfWidth;
 		int num4 = num2 + this.mapPath.halfHeight;
+        //碰撞检测，网格尺寸和碰撞尺寸进行比较   ????????????????????????????????????????
 		int num5 = GameScene._mapPath.grids[num3, num4] >> collisionSize & 1;
 		if (num5 == 1)
 		{
@@ -792,7 +841,13 @@ public class GameScene
 		num5 = (GameScene._mapPath.grids[num3, num4] >> collisionSize - 1 & 1);
 		return num5 != 1;
 	}
-
+    /// <summary>
+    /// 同上判断目标点是否可以移动，并且回去所在网格类型值
+    /// </summary>
+    /// <param name="worldPostion"></param>
+    /// <param name="collisionSize"></param>
+    /// <param name="gridType"></param>
+    /// <returns></returns>
 	public bool IsValidForWalk(Vector3 worldPostion, int collisionSize, out int gridType)
 	{
 		int num = Mathf.FloorToInt(worldPostion.x / this.detailGridSize);
@@ -814,7 +869,11 @@ public class GameScene
 		num6 = (GameScene._mapPath.grids[num3, num4] >> collisionSize - 1 & 1);
 		return num6 != 1;
 	}
-
+    /// <summary>
+    /// 获取目标所在grid上的网格类型
+    /// </summary>
+    /// <param name="worldPostion"></param>
+    /// <returns></returns>
 	public int getGridType(Vector3 worldPostion)
 	{
 		int num = Mathf.FloorToInt(worldPostion.x / this.detailGridSize);
@@ -823,7 +882,11 @@ public class GameScene
 		int num4 = num2 + this.mapPath.halfHeight;
 		return GameScene._mapPath.grids[num3, num4] >> this.mapPath.gridTypeMask;
 	}
-
+    /// <summary>
+    /// 获取目标所在grid记录的数据值
+    /// </summary>
+    /// <param name="worldPostion"></param>
+    /// <returns></returns>
 	public int getGridValue(Vector3 worldPostion)
 	{
 		int num = Mathf.FloorToInt(worldPostion.x / this.detailGridSize);
@@ -832,7 +895,9 @@ public class GameScene
 		int num4 = num2 + this.mapPath.halfHeight;
 		return GameScene._mapPath.grids[num3, num4];
 	}
-
+    /// <summary>
+    /// 更新路径阻塞状态
+    /// </summary>
 	public void UpdateWalkBlocker()
 	{
 		if (this.saveMapPath != null)
@@ -840,7 +905,9 @@ public class GameScene
 			this.saveMapPath.PrepareForPathSearch();
 		}
 	}
-
+    /// <summary>
+    /// 更新细节路径映射
+    /// </summary>
 	public void UpdateDetailMapPath()
 	{
 		int width = this.saveMapPath.width;
@@ -865,15 +932,20 @@ public class GameScene
 		this.detailGridSize = this._terrainConfig.gridSize * 0.5f;
 	}
 
+    /// <summary>
+    /// 创建一个空的unit
+    /// </summary>
+    /// <param name="createID"></param>
+    /// <returns></returns>
 	public GameObjectUnit CreateEmptyUnit(int createID = -1)
 	{
-		if (createID < 0)
+		if (createID < 0)  //未指定id，自动创建id
 		{
 			this.unitIdCount++;
 			createID = this.unitCount;
 		}
 		GameObjectUnit gameObjectUnit;
-		if (this.staticUnitcCache.Count > 0)
+		if (this.staticUnitcCache.Count > 0)   //如果静态unit缓存中有，重用缓存中的
 		{
 			gameObjectUnit = this.staticUnitcCache[0];
 			gameObjectUnit.destroyed = false;
@@ -885,7 +957,10 @@ public class GameScene
 		}
 		return gameObjectUnit;
 	}
-
+    /// <summary>
+    /// 移除空unit
+    /// </summary>
+    /// <param name="unit"></param>
 	public void RemoveEmptyUnit(GameObjectUnit unit)
 	{
 		if (!this.staticUnitcCache.Contains(unit))

@@ -282,7 +282,9 @@ public class LODTerrainData
 		}
 		this.GenerateSplatsmapTex();
 	}
-
+    /// <summary>
+    /// 生成高度贴图纹理
+    /// </summary>
 	public void GenerateHeightMapTex()
 	{
 		this._heightmapTex = new Texture2D(this.heightmapResolution, this.heightmapResolution, TextureFormat.ARGB32, false);
@@ -297,7 +299,9 @@ public class LODTerrainData
 		}
 		this._heightmapTex.Apply();
 	}
-
+    /// <summary>
+    /// 生成splat纹理贴图
+    /// </summary>
 	public void GenerateSplatsmapTex()
 	{
 		float[,,] array = this.splatsmap;
